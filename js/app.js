@@ -17,6 +17,7 @@ import { drawRenderer } from './draw-renderer.js';
 import { inspector } from './inspector.js';
 import { exporter } from './exporter.js';
 import { serializer } from './serializer.js';
+import { projectManager } from './project-manager.js';
 
 // Tools
 import { selectTool } from './tools/select.js';
@@ -54,6 +55,7 @@ class App {
         inspector.init();
         exporter.init();
         serializer.init();
+        projectManager.init();
         
         // Bind toolbar buttons
         this.bindToolbar();
@@ -132,8 +134,18 @@ class App {
         });
         
         // Undo/Redo
+        // Undo/Redo
         document.getElementById('btn-undo').addEventListener('click', () => history.undo());
         document.getElementById('btn-redo').addEventListener('click', () => history.redo());
+        
+        // Auth Logout
+        const btnLogout = document.getElementById('btn-logout');
+        if (btnLogout) {
+            btnLogout.addEventListener('click', () => {
+                fetch('api/auth.php?action=logout', { method: 'POST' })
+                    .then(() => window.location.href = 'login.php');
+            });
+        }
         
         // PDF upload
         document.getElementById('pdf-upload').addEventListener('change', (e) => {

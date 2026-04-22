@@ -1,0 +1,104 @@
+# ============================================================
+# PDF Layout Designer — .gitignore
+# ============================================================
+
+# ------------------------------------------------------------
+# Environment & Secrets (NEVER commit these)
+# ------------------------------------------------------------
+.env
+*.local
+*.secret
+
+# ------------------------------------------------------------
+# PHP / Composer
+# ------------------------------------------------------------
+vendor/
+composer.phar
+.php-cs-fixer.cache
+.phpunit.result.cache
+
+# ------------------------------------------------------------
+# Portable PHP binary (downloaded by build-electron.bat)
+# ------------------------------------------------------------
+php/
+
+# ------------------------------------------------------------
+# Electron — build output & generated files
+# ------------------------------------------------------------
+dist/
+electron/node_modules/
+electron/dist-obfuscated/
+electron/package-lock.json
+
+# ------------------------------------------------------------
+# Node.js (general)
+# ------------------------------------------------------------
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnp
+.pnp.js
+
+# ------------------------------------------------------------
+# OS-generated files
+# ------------------------------------------------------------
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+
+# ------------------------------------------------------------
+# IDE & Editor files
+# ------------------------------------------------------------
+
+# VS Code
+.vscode/
+!.vscode/extensions.json
+
+# JetBrains (PhpStorm, WebStorm, etc.)
+.idea/
+*.iml
+*.iws
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim / Emacs
+*.swp
+*.swo
+*~
+\#*\#
+
+# ------------------------------------------------------------
+# Logs & Temporary files
+# ------------------------------------------------------------
+*.log
+*.tmp
+*.temp
+/tmp/
+/logs/
+
+# ------------------------------------------------------------
+# Build artifacts (keep source, ignore output)
+# ------------------------------------------------------------
+*.exe
+*.dmg
+*.pkg
+*.deb
+*.rpm

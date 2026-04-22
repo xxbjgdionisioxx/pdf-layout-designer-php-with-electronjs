@@ -1,0 +1,86 @@
+{
+  "name": "pdf-layout-designer",
+  "version": "2.0.0",
+  "description": "PDF Visual Layout Designer — Desktop Edition",
+  "author": "Bryan James Dionisio",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "prebuild": "node obfuscate.js",
+    "build": "electron-builder --win",
+    "build:dir": "electron-builder --win --dir"
+  },
+  "devDependencies": {
+    "electron": "^30.0.0",
+    "electron-builder": "^24.0.0",
+    "electron-icon-builder": "^2.0.1",
+    "javascript-obfuscator": "^5.4.1",
+    "png-to-ico": "^3.0.1"
+  },
+  "build": {
+    "appId": "com.bdjd.pdf-layout-designer",
+    "productName": "PDF Layout Designer",
+    "copyright": "Copyright © 2026 Bryan James Dionisio",
+    "asar": true,
+    "win": {
+      "signingHashAlgorithms": null,
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico"
+    },
+    "directories": {
+      "output": "../dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "dist-obfuscated/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "dist-obfuscated/api",
+        "to": "app/api"
+      },
+      {
+        "from": "dist-obfuscated/js",
+        "to": "app/js"
+      },
+      {
+        "from": "../vendor",
+        "to": "app/vendor"
+      },
+      {
+        "from": "dist-obfuscated/style.css",
+        "to": "app/style.css"
+      },
+      {
+        "from": "dist-obfuscated/index.php",
+        "to": "app/index.php"
+      },
+      {
+        "from": "dist-obfuscated/login.php",
+        "to": "app/login.php"
+      },
+      {
+        "from": "../php",
+        "to": "php"
+      }
+    ],
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "PDF Layout Designer"
+    }
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2"
+  }
+}

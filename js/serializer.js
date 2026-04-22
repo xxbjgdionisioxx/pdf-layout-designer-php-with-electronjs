@@ -31,9 +31,7 @@ class Serializer {
         // Set default filename
         let defaultName = 'layout';
         if (state.pdfFilename) {
-            defaultName = state.pdfFilename.replace('.pdf', '');
-            // If it's a UUID or too long, maybe clean it up? 
-            // For now, let's just use it but without the .pdf
+            defaultName = state.pdfFilename.replace(/\.pdf$/i, '');
         }
         
         input.value = defaultName;
@@ -48,10 +46,9 @@ class Serializer {
     confirmSave() {
         let filename = document.getElementById('modal-save-filename').value.trim() || 'layout';
         
-        // Ensure .json extension
-        if (!filename.toLowerCase().endsWith('.json')) {
-            filename += '.json';
-        }
+        // Ensure clean .json extension
+        filename = filename.replace(/\.(pdf|json)$/i, '');
+        filename += '.json';
 
         const data = state.serialize();
         data.version = '1.0';
@@ -68,7 +65,7 @@ class Serializer {
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        setTimeout(() => URL.revokeObjectURL(url), 100);
 
         // Close modal
         document.getElementById('modal-save').style.display = 'none';

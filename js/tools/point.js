@@ -36,7 +36,7 @@ class PointTool {
         input.value = '';
         cellW.value = '0';
         cellH.value = '10';
-        fontSize.value = '12';
+        fontSize.value = '11';
 
         modal.style.display = 'flex';
         setTimeout(() => input.focus(), 50);
