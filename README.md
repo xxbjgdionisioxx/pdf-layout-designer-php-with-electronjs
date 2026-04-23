@@ -41,6 +41,10 @@ A professional, multi-user **web + desktop** visual designer for creating PHP PD
 | **Table Tool** | Create data grids — supports **static** and **dynamic loop** (`foreach`) mode |
 | **Checkbox** | Render boolean tick boxes (`$pdf->Rect()` / `☑`) |
 | **Input Box** | Render text fields with underline accents |
+| **Button Group** | Click-to-place Radio buttons or Checkboxes. Options with the same Group Name are automatically merged into a single DB column. Exporter uses `if/elseif/else` logic for radios and independent `if` statements for checkboxes using `$pdf->Cell()`. Supports quick duplication via `[+ Add Option (Clone)]`. |
+
+### 🗑️ Workspace Controls
+- **Delete All**: Instantly clear all drawn elements from the current page via the Inspector's "Delete All" button.
 
 ### ☁️ Cloud Project Management
 - **Supabase PostgreSQL** backend — projects saved remotely, not in the browser
