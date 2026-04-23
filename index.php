@@ -120,6 +120,13 @@ if (!isset($_SESSION['user_id'])) {
                     </svg>
                     <span class="tool-label">Table</span>
                 </button>
+                <button class="tool-btn" id="btn-button" title="Button Group" data-tool="button">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="9" />
+                        <circle cx="12" cy="12" r="4" fill="currentColor" />
+                    </svg>
+                    <span class="tool-label">Button</span>
+                </button>
             </div>
 
             <div class="toolbar-separator"></div>
@@ -485,6 +492,31 @@ if (!isset($_SESSION['user_id'])) {
                             </div>
                         </div>
 
+                        <!-- Button Group Fields -->
+                        <div id="button-fields" style="display:none;">
+                            <div class="inspector-field full-width">
+                                <label for="sel-button-label">Group Name (DB Column)</label>
+                                <input type="text" id="sel-button-label" placeholder="e.g. gender">
+                            </div>
+                            <div class="inspector-field full-width">
+                                <label for="sel-button-type">Button Style</label>
+                                <select id="sel-button-type"
+                                    style="padding:6px 10px; background:var(--bg-surface); border:1px solid var(--border-default); border-radius:6px; color:var(--text-primary); font-size:13px; cursor:pointer;">
+                                    <option value="radio" selected>Radio (Single Choice)</option>
+                                    <option value="checkbox">Checkbox (Multi Choice)</option>
+                                </select>
+                            </div>
+                            <div class="inspector-field full-width" style="margin-top: 8px;">
+                                <label for="sel-button-value">Button Value</label>
+                                <input type="text" id="sel-button-value" placeholder="e.g. Male">
+                            </div>
+                            <div class="inspector-field full-width" style="margin-top: 12px;">
+                                <button id="btn-clone-button" class="btn-primary" style="width: 100%; padding: 6px; font-size: 12px;">
+                                    + Add Option (Clone)
+                                </button>
+                            </div>
+                        </div>
+
                         <div class="inspector-actions">
                             <button id="btn-delete-selected" class="btn-danger" title="Delete Selected (Del)">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -512,7 +544,15 @@ if (!isset($_SESSION['user_id'])) {
 
                     <!-- Elements List -->
                     <div class="inspector-section">
-                        <h3>Elements <span id="element-count" class="badge">0</span></h3>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <h3 style="margin: 0;">Elements <span id="element-count" class="badge">0</span></h3>
+                            <button id="btn-delete-all" class="icon-btn" style="color: var(--danger-color); padding: 4px; display: none;" title="Delete All Elements">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="3 6 5 6 21 6" />
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                </svg>
+                            </button>
+                        </div>
                         <div id="elements-list" class="elements-list">
                             <p class="no-elements">No elements on this page</p>
                         </div>

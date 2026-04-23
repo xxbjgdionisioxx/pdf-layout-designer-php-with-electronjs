@@ -52,6 +52,7 @@ class DrawRenderer {
             case 'point': this.drawPoint(ctx, el, scale, isSelected); break;
             case 'checkbox': this.drawCheckbox(ctx, el, scale, isSelected); break;
             case 'inputbox': this.drawInputbox(ctx, el, scale, isSelected); break;
+            case 'button': this.drawButton(ctx, el, scale, isSelected); break;
         }
     }
 
@@ -409,6 +410,57 @@ class DrawRenderer {
         ctx.restore();
     }
 
+    drawButton(ctx, el, scale, isSelected) {
+        const x = el.x * scale;
+        const y = el.y * scale;
+        const w = el.w * scale;
+        const h = el.h * scale;
+        const color = isSelected ? COLORS.selected : COLORS.button;
+
+        ctx.save();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = isSelected ? 2 : 1.5;
+        ctx.fillStyle = isSelected ? 'rgba(255, 215, 0, 0.08)' : 'rgba(168, 85, 247, 0.1)';
+
+        const isRadio = el.buttonType === 'radio' || !el.buttonType;
+
+        if (isRadio) {
+            // Draw circle
+            const cx = x + w / 2;
+            const cy = y + h / 2;
+            const r = Math.min(w, h) / 2;
+            ctx.beginPath();
+            ctx.arc(cx, cy, r, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // Inner dot
+            ctx.beginPath();
+            ctx.arc(cx, cy, r * 0.4, 0, Math.PI * 2);
+            ctx.fillStyle = color;
+            ctx.fill();
+        } else {
+            // Draw square
+            ctx.fillRect(x, y, w, h);
+            ctx.strokeRect(x, y, w, h);
+
+            // Inner square
+            ctx.fillStyle = color;
+            ctx.fillRect(x + w * 0.25, y + h * 0.25, w * 0.5, h * 0.5);
+        }
+
+        // Label (Group Name) and Value
+        const labelText = el.label ? el.label : 'Group';
+        const valText = el.buttonValue ? `[${el.buttonValue}]` : '';
+
+        ctx.font = `600 10px 'Inter', sans-serif`;
+        ctx.fillStyle = color;
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'bottom';
+        ctx.fillText(`${labelText} ${valText}`, x, y - 2);
+        ctx.restore();
+    }
+
     /**
      * Draw resize handles for selected elements
      */
@@ -455,6 +507,7 @@ class DrawRenderer {
             case 'table':
             case 'checkbox':
             case 'inputbox':
+            case 'button':
                 return { x: el.x * scale, y: el.y * scale, w: el.w * scale, h: el.h * scale };
             case 'text':
                 return {

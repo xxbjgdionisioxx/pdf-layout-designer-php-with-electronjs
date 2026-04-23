@@ -28,6 +28,7 @@ import { textTool } from './tools/text.js';
 import { lineTool } from './tools/line.js';
 import { imageTool } from './tools/image.js';
 import { tableTool } from './tools/table.js';
+import { buttonTool } from './tools/button.js';
 
 class App {
     constructor() {
@@ -39,6 +40,7 @@ class App {
             line: lineTool,
             image: imageTool,
             table: tableTool,
+            button: buttonTool,
         };
     }
     

@@ -193,7 +193,22 @@ function gatherColumns(dialect) {
             const sqlType  = el.dbType || defaultSqlType(el.type);
             const comment  = `${elementTypeLabel(el)} — label: ${rawLabel}`;
 
-            flatCols.push({ colName, sqlType, comment });
+            if (el.type === 'button') {
+                const existing = flatCols.find(c => c.colName === colName);
+                if (existing) {
+                    // It's a group button, and we already added a column for this group.
+                    // We append the new button's value to the comment.
+                    if (el.buttonValue) {
+                        existing.comment += `, [${el.buttonValue}]`;
+                    }
+                    continue; // Skip adding a duplicate column
+                } else {
+                    const cmt = el.buttonValue ? `${comment} [${el.buttonValue}]` : comment;
+                    flatCols.push({ colName, sqlType, comment: cmt });
+                }
+            } else {
+                flatCols.push({ colName, sqlType, comment });
+            }
         }
     }
 

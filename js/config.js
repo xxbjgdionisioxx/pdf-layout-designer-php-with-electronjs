@@ -35,6 +35,7 @@ export const COLORS = {
     point: '#ff6b6b',
     checkbox: '#34d399',
     inputbox: '#60a5fa',
+    button: '#a855f7',
     selected: '#ffd700',
     handle: '#ffffff',
     margin: 'rgba(248, 81, 73, 0.35)',
@@ -54,6 +55,7 @@ export const TOOL_TYPES = {
     TABLE: 'table',
     CHECKBOX: 'checkbox',
     INPUTBOX: 'inputbox',
+    BUTTON: 'button',
 };
 
 export const ELEMENT_TYPES = {
@@ -65,4 +67,5 @@ export const ELEMENT_TYPES = {
     POINT: 'point',
     CHECKBOX: 'checkbox',
     INPUTBOX: 'inputbox',
+    BUTTON: 'button',
 };

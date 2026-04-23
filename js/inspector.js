@@ -94,9 +94,29 @@ class Inspector {
         const ibType = document.getElementById('sel-inputbox-type');
         if (ibType) ibType.addEventListener('change', () => this.applyFormFieldChanges('inputbox'));
 
+        // Button fields
+        ['sel-button-label', 'sel-button-value'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('input', () => this.applyFormFieldChanges('button'));
+        });
+        const btnType = document.getElementById('sel-button-type');
+        if (btnType) btnType.addEventListener('change', () => this.applyFormFieldChanges('button'));
+
         // Delete button
         document.getElementById('btn-delete-selected').addEventListener('click', () => {
             this.deleteSelected();
+        });
+
+        // Clone Button
+        document.getElementById('btn-clone-button')?.addEventListener('click', () => {
+            this.cloneSelected();
+        });
+
+        // Delete All button
+        document.getElementById('btn-delete-all')?.addEventListener('click', () => {
+            if (confirm('Are you sure you want to delete ALL elements on this page?')) {
+                this.deleteAll();
+            }
         });
     }
 
@@ -145,6 +165,7 @@ class Inspector {
         document.getElementById('point-fields').style.display = el.type === 'point' ? 'block' : 'none';
         document.getElementById('checkbox-fields').style.display = el.type === 'checkbox' ? 'block' : 'none';
         document.getElementById('inputbox-fields').style.display = el.type === 'inputbox' ? 'block' : 'none';
+        document.getElementById('button-fields').style.display = el.type === 'button' ? 'block' : 'none';
 
         if (el.type === 'rect') {
             document.getElementById('sel-rect-label').value = el.label || '';
@@ -185,6 +206,12 @@ class Inspector {
             document.getElementById('sel-inputbox-label').value = el.label || '';
             document.getElementById('sel-inputbox-col').value = el.dbColumn || '';
             document.getElementById('sel-inputbox-type').value = el.dbType || 'VARCHAR(255)';
+        }
+
+        if (el.type === 'button') {
+            document.getElementById('sel-button-label').value = el.label || '';
+            document.getElementById('sel-button-type').value = el.buttonType || 'radio';
+            document.getElementById('sel-button-value').value = el.buttonValue || '';
         }
     }
 
@@ -272,6 +299,10 @@ class Inspector {
             el.label    = document.getElementById('sel-inputbox-label').value;
             el.dbColumn = document.getElementById('sel-inputbox-col').value;
             el.dbType   = document.getElementById('sel-inputbox-type').value;
+        } else if (type === 'button') {
+            el.label       = document.getElementById('sel-button-label').value;
+            el.buttonType  = document.getElementById('sel-button-type').value;
+            el.buttonValue = document.getElementById('sel-button-value').value;
         }
 
         state.emit('elementsChanged');
@@ -288,6 +319,40 @@ class Inspector {
         state.clearSelection();
     }
 
+    deleteAll() {
+        const elements = state.getPageElements();
+        if (elements.length === 0) return;
+
+        history.pushState('delete all');
+
+        const ids = elements.map(e => e.id);
+        ids.forEach(id => state.removeElement(id));
+
+        state.clearSelection();
+    }
+
+    cloneSelected() {
+        if (state.selectedElements.length === 0) return;
+        const el = state.selectedElements[0];
+
+        history.pushState('clone element');
+
+        const newEl = { ...el };
+        delete newEl.id; // Let state.js assign a new ID
+        
+        // Offset the new element slightly to the right
+        newEl.x = parseFloat((el.x + el.w + 2).toFixed(1));
+
+        // If it's a button and has a numeric suffix, maybe increment it? 
+        // We'll leave the value identical or clear it, so the user can easily type a new one.
+        if (newEl.type === 'button') {
+            newEl.buttonValue = '';
+        }
+
+        state.addElement(newEl);
+        state.selectElement(newEl);
+    }
+
     updateElementsList() {
         const list = document.getElementById('elements-list');
         const count = document.getElementById('element-count');
@@ -295,12 +360,17 @@ class Inspector {
 
         count.textContent = elements.length;
 
+        const btnDeleteAll = document.getElementById('btn-delete-all');
+        if (btnDeleteAll) {
+            btnDeleteAll.style.display = elements.length > 0 ? 'inline-flex' : 'none';
+        }
+
         if (elements.length === 0) {
             list.innerHTML = '<p class="no-elements">No elements on this page</p>';
             return;
         }
 
-        const icons = { rect: '▭', text: 'T', line: '╱', image: '🖼', table: '⊞', point: '◎', checkbox: '☑', inputbox: '▤' };
+        const icons = { rect: '▭', text: 'T', line: '╱', image: '🖼', table: '⊞', point: '◎', checkbox: '☑', inputbox: '▤', button: '◉' };
 
         list.innerHTML = elements.map(el => {
             const isSelected = state.selectedElements.includes(el);

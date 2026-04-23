@@ -69,10 +69,76 @@ class FpdfGenerator extends BaseGenerator {
         if (pages.size === 0) return `$pdf->AddPage();\n\n`;
         for (const pageNum of this.getSortedPages()) {
             code += `// --- Page ${pageNum} ---\n$pdf->AddPage();\n\n`;
-            for (const el of pages.get(pageNum)) code += this.elToCode(el);
+            
+            const elements = pages.get(pageNum);
+            const normalElements = [];
+            const buttonGroups = {};
+
+            for (const el of elements) {
+                if (el.type === 'button') {
+                    const groupName = el.label || 'group';
+                    if (!buttonGroups[groupName]) buttonGroups[groupName] = [];
+                    buttonGroups[groupName].push(el);
+                } else {
+                    normalElements.push(el);
+                }
+            }
+
+            for (const el of normalElements) {
+                code += this.elToCode(el);
+            }
+            
+            for (const [groupName, btns] of Object.entries(buttonGroups)) {
+                code += this.buttonGroupToCode(groupName, btns);
+            }
             code += '\n';
         }
         return code;
+    }
+
+    buttonGroupToCode(groupName, btns) {
+        let c = `// Button Group: "${groupName}"\n`;
+        const varName = `$${this.slugify(groupName)}`;
+        
+        const isRadio = btns[0].buttonType === 'radio' || !btns[0].buttonType;
+
+        if (isRadio) {
+            btns.forEach((el, index) => {
+                const val = this.esc(el.buttonValue || '');
+                const condition = index === 0 ? `if` : `elseif`;
+                c += `${condition} (${varName} == '${val}') {\n`;
+                
+                btns.forEach(b => {
+                    c += `    $pdf->SetXY(${b.x}, ${b.y});\n`;
+                    if (b === el) {
+                        c += `    $pdf->Cell(${b.w}, ${b.h}, 'X', 1, 0, 'C'); // Checked\n`;
+                    } else {
+                        c += `    $pdf->Cell(${b.w}, ${b.h}, ' ', 1, 0, 'C'); // Empty box\n`;
+                    }
+                });
+                c += `}\n`;
+            });
+            
+            c += `else {\n`;
+            btns.forEach(b => {
+                c += `    $pdf->SetXY(${b.x}, ${b.y});\n`;
+                c += `    $pdf->Cell(${b.w}, ${b.h}, ' ', 1, 0, 'C'); // Empty box\n`;
+            });
+            c += `}\n\n`;
+        } else {
+            // Checkbox (Multi Choice)
+            btns.forEach((el) => {
+                const val = this.esc(el.buttonValue || '');
+                c += `if (strpos(${varName}, '${val}') !== false) {\n`;
+                c += `    $pdf->SetXY(${el.x}, ${el.y});\n`;
+                c += `    $pdf->Cell(${el.w}, ${el.h}, 'X', 1, 0, 'C'); // Checked\n`;
+                c += `} else {\n`;
+                c += `    $pdf->SetXY(${el.x}, ${el.y});\n`;
+                c += `    $pdf->Cell(${el.w}, ${el.h}, ' ', 1, 0, 'C'); // Empty box\n`;
+                c += `}\n\n`;
+            });
+        }
+        return c;
     }
 
     elToCode(el) {
@@ -336,7 +402,24 @@ class DompdfGenerator extends BaseGenerator {
         code += `  .abs { position: absolute; }\n`;
         code += `</style>\n</head>\n<body>\n<div class="page">\n`;
 
-        for (const el of allElements) code += this.elToHtml(el);
+        const normalElements = [];
+        const buttonGroups = {};
+        for (const el of allElements) {
+            if (el.type === 'button') {
+                const groupName = el.label || 'group';
+                if (!buttonGroups[groupName]) buttonGroups[groupName] = [];
+                buttonGroups[groupName].push(el);
+            } else {
+                normalElements.push(el);
+            }
+        }
+
+        for (const el of normalElements) {
+            code += this.elToHtml(el);
+        }
+        for (const [groupName, btns] of Object.entries(buttonGroups)) {
+            code += this.buttonGroupToHtml(groupName, btns);
+        }
 
         code += `</div>\n</body>\n</html>\nHTML;\n\n`;
         code += `$dompdf->loadHtml($html);\n`;
@@ -407,8 +490,53 @@ class DompdfGenerator extends BaseGenerator {
                 return `  <!-- Input: "${ibLabel}" → DB: ${dbCol} -->\n` +
                     `  <div class="abs" style="left:${el.x}mm;top:${el.y}mm;width:${el.w}mm;height:${el.h}mm;border-bottom:1px solid #000;"></div>\n`;
             }
+
         }
         return '';
+    }
+
+    buttonGroupToHtml(groupName, btns) {
+        let h = `  <!-- Button Group: "${groupName}" -->\n`;
+        const varName = `$${this.slugify(groupName)}`;
+        
+        const isRadio = btns[0].buttonType === 'radio' || !btns[0].buttonType;
+
+        if (isRadio) {
+            btns.forEach((el, index) => {
+                const val = this.esc(el.buttonValue || '');
+                const condition = index === 0 ? `if` : `elseif`;
+                h += `  <?php ${condition} (${varName} == '${val}'): ?>\n`;
+                
+                btns.forEach(b => {
+                    const borderRadius = '50%';
+                    if (b === el) {
+                        h += `  <div class="abs" style="left:${b.x}mm;top:${b.y}mm;width:${b.w}mm;height:${b.h}mm;border:1px solid #000;background-color:#000;border-radius:${borderRadius};"></div>\n`;
+                    } else {
+                        h += `  <div class="abs" style="left:${b.x}mm;top:${b.y}mm;width:${b.w}mm;height:${b.h}mm;border:1px solid #000;border-radius:${borderRadius};"></div>\n`;
+                    }
+                });
+            });
+            
+            h += `  <?php else: ?>\n`;
+            btns.forEach(b => {
+                const borderRadius = '50%';
+                h += `  <div class="abs" style="left:${b.x}mm;top:${b.y}mm;width:${b.w}mm;height:${b.h}mm;border:1px solid #000;border-radius:${borderRadius};"></div>\n`;
+            });
+            h += `  <?php endif; ?>\n`;
+        } else {
+            // Checkbox (Multi Choice)
+            btns.forEach((el) => {
+                const val = this.esc(el.buttonValue || '');
+                const borderRadius = '0';
+                h += `  <?php if (strpos(${varName}, '${val}') !== false): ?>\n`;
+                h += `  <div class="abs" style="left:${el.x}mm;top:${el.y}mm;width:${el.w}mm;height:${el.h}mm;border:1px solid #000;background-color:#000;border-radius:${borderRadius};"></div>\n`;
+                h += `  <?php else: ?>\n`;
+                h += `  <div class="abs" style="left:${el.x}mm;top:${el.y}mm;width:${el.w}mm;height:${el.h}mm;border:1px solid #000;border-radius:${borderRadius};"></div>\n`;
+                h += `  <?php endif; ?>\n`;
+            });
+        }
+        
+        return h;
     }
 }
 
