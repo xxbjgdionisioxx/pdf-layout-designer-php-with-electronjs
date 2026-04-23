@@ -18,6 +18,7 @@ import { inspector } from './inspector.js';
 import { exporter } from './exporter.js';
 import { serializer } from './serializer.js';
 import { projectManager } from './project-manager.js';
+import { dbExporter } from './db-exporter.js';
 
 // Tools
 import { selectTool } from './tools/select.js';
@@ -56,6 +57,7 @@ class App {
         exporter.init();
         serializer.init();
         projectManager.init();
+        dbExporter.init();
         
         // Bind toolbar buttons
         this.bindToolbar();

@@ -107,10 +107,80 @@ class PdfRenderer {
             
             this.pageCache.clear();
             await this.renderCurrentPage();
+
+            // Detect interactive form fields (AcroForm) — silent skip if none found
+            await this.detectFormFields();
             
         } catch (err) {
             console.error('Source PDF load error:', err);
             throw err;
+        }
+    }
+
+    /**
+     * Detect AcroForm widget annotations in the PDF and add them as canvas elements.
+     * Checkbox (Btn) → type 'checkbox', Text input (Tx) → type 'inputbox'.
+     * Coordinates are converted from PDF points to mm.
+     * Silently skips pages with no annotations.
+     */
+    async detectFormFields() {
+        if (!this.pdfDoc) return;
+
+        let added = 0;
+
+        for (let pageNum = 1; pageNum <= this.pdfDoc.numPages; pageNum++) {
+            const page = await this.pdfDoc.getPage(pageNum);
+            const annotations = await page.getAnnotations();
+            const viewport = page.getViewport({ scale: 1.0 });
+            const pageHeightPt = viewport.height; // PDF points, origin at bottom-left
+
+            for (const ann of annotations) {
+                // Only process interactive form widgets
+                if (ann.subtype !== 'Widget') continue;
+
+                const fieldType = ann.fieldType; // 'Btn', 'Tx', 'Ch', etc.
+                if (fieldType !== 'Btn' && fieldType !== 'Tx') continue;
+
+                // ann.rect is [x1, y1, x2, y2] in PDF coordinate space (bottom-left origin)
+                const [rx1, ry1, rx2, ry2] = ann.rect;
+
+                // Convert to top-left origin (flip Y) then to mm
+                const xMm  = parseFloat((Math.min(rx1, rx2) * 0.352778).toFixed(1));
+                const yMm  = parseFloat(((pageHeightPt - Math.max(ry1, ry2)) * 0.352778).toFixed(1));
+                const wMm  = parseFloat((Math.abs(rx2 - rx1) * 0.352778).toFixed(1));
+                const hMm  = parseFloat((Math.abs(ry2 - ry1) * 0.352778).toFixed(1));
+
+                // Skip degenerate rects
+                if (wMm < 1 || hMm < 1) continue;
+
+                // Derive label from PDF field metadata
+                const rawLabel = ann.fieldName || ann.alternativeText || '';
+                // Use only the last segment of dot-delimited field names (e.g. "Form1.#subform[0].Name" → "Name")
+                const label = rawLabel.split('.').pop().replace(/\[.*?\]/g, '').trim();
+
+                const elementType = fieldType === 'Btn' ? 'checkbox' : 'inputbox';
+
+                const el = {
+                    type: elementType,
+                    x: xMm,
+                    y: yMm,
+                    w: wMm,
+                    h: hMm,
+                    label: label,
+                    dbColumn: '',  // user can override in Inspector
+                    dbType: elementType === 'checkbox' ? 'BOOLEAN' : 'VARCHAR(255)',
+                    page: pageNum,
+                };
+
+                if (!state.elements.has(pageNum)) state.elements.set(pageNum, []);
+                el.id = state.generateId();
+                state.elements.get(pageNum).push(el);
+                added++;
+            }
+        }
+
+        if (added > 0) {
+            state.emit('elementsChanged');
         }
     }
     

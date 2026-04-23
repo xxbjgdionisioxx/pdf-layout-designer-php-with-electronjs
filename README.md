@@ -38,6 +38,8 @@ A professional, multi-user **web + desktop** visual designer for creating PHP PD
 | **Line Tool** | Draw dividers and paths (`$pdf->Line()`) |
 | **Image Placeholder** | Position image slots for dynamic injection |
 | **Table Tool** | Create data grids — supports **static** and **dynamic loop** (`foreach`) mode |
+| **Checkbox** | Render boolean tick boxes (`$pdf->Rect()` / `☑`) |
+| **Input Box** | Render text fields with underline accents |
 
 ### ☁️ Cloud Project Management
 - **Supabase PostgreSQL** backend — projects saved remotely, not in the browser
@@ -84,6 +86,21 @@ One-click PHP code generation from your entire canvas layout. Switch between 4 P
 - **Margin visualizers** (configurable T/R/B/L)
 - **Zoom** in/out/fit/reset controls
 - **Full Undo / Redo** history
+
+### 🗄️ Database Schema Exporter
+Generate `CREATE TABLE` SQL statements instantly from your canvas layout.
+- **Auto-syncs live** as you add, rename, or delete elements.
+- **Multi-dialect support:** MySQL, MariaDB, PostgreSQL, SQLite, SQL Server.
+- Maps element labels directly to `snake_case` database column names.
+- Automatically infers SQL data types (Checkboxes → `BOOLEAN`, Text/Images → `VARCHAR(255)`).
+- Canvas Table elements generate their own separate relational `CREATE TABLE` definitions.
+
+### 📄 PDF Form Auto-Detection
+Upload an existing PDF with AcroForm fields, and the designer will automatically:
+- Parse `Widget` annotations via PDF.js.
+- Auto-generate `checkbox` and `inputbox` elements on your canvas.
+- Map original PDF field names directly to element labels.
+- Convert PDF coordinate space to standard millimeter bounds automatically.
 
 ---
 

@@ -50,6 +50,8 @@ class DrawRenderer {
             case 'image': this.drawImage(ctx, el, scale, isSelected); break;
             case 'table': this.drawTable(ctx, el, scale, isSelected); break;
             case 'point': this.drawPoint(ctx, el, scale, isSelected); break;
+            case 'checkbox': this.drawCheckbox(ctx, el, scale, isSelected); break;
+            case 'inputbox': this.drawInputbox(ctx, el, scale, isSelected); break;
         }
     }
 
@@ -320,6 +322,93 @@ class DrawRenderer {
         ctx.restore();
     }
 
+    drawCheckbox(ctx, el, scale, isSelected) {
+        const x = el.x * scale;
+        const y = el.y * scale;
+        const w = el.w * scale;
+        const h = el.h * scale;
+        const color = isSelected ? COLORS.selected : COLORS.checkbox;
+
+        ctx.save();
+        // Outer box
+        ctx.strokeStyle = color;
+        ctx.lineWidth = isSelected ? 2 : 1.5;
+        ctx.fillStyle = isSelected ? 'rgba(255, 215, 0, 0.08)' : 'rgba(52, 211, 153, 0.1)';
+        ctx.fillRect(x, y, w, h);
+        ctx.strokeRect(x, y, w, h);
+
+        // Checkmark
+        const cx = x + w * 0.2;
+        const cy = y + h * 0.55;
+        const ex = x + w * 0.45;
+        const ey = y + h * 0.8;
+        const fx = x + w * 0.8;
+        const fy = y + h * 0.2;
+        ctx.strokeStyle = color;
+        ctx.lineWidth = Math.max(1, w * 0.12);
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(ex, ey);
+        ctx.lineTo(fx, fy);
+        ctx.stroke();
+
+        // Label badge
+        if (el.label) {
+            ctx.font = `600 10px 'Inter', sans-serif`;
+            ctx.fillStyle = color;
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'bottom';
+            ctx.fillText(el.label, x, y - 2);
+        }
+        ctx.restore();
+    }
+
+    drawInputbox(ctx, el, scale, isSelected) {
+        const x = el.x * scale;
+        const y = el.y * scale;
+        const w = el.w * scale;
+        const h = el.h * scale;
+        const color = isSelected ? COLORS.selected : COLORS.inputbox;
+
+        ctx.save();
+        // Background
+        ctx.fillStyle = isSelected ? 'rgba(255, 215, 0, 0.06)' : 'rgba(96, 165, 250, 0.07)';
+        ctx.fillRect(x, y, w, h);
+
+        // Dashed border
+        ctx.strokeStyle = color;
+        ctx.lineWidth = isSelected ? 2 : 1.5;
+        ctx.setLineDash([4, 3]);
+        ctx.strokeRect(x, y, w, h);
+        ctx.setLineDash([]);
+
+        // Bottom accent line (solid)
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(x + 3, y + h);
+        ctx.lineTo(x + w - 3, y + h);
+        ctx.stroke();
+
+        // Input cursor icon
+        ctx.fillStyle = color;
+        ctx.font = `10px 'JetBrains Mono', monospace`;
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('▤', x + 4, y + h / 2);
+
+        // Label
+        if (el.label) {
+            ctx.font = `600 10px 'Inter', sans-serif`;
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'bottom';
+            ctx.fillText(el.label, x, y - 2);
+        }
+        ctx.restore();
+    }
+
     /**
      * Draw resize handles for selected elements
      */
@@ -364,6 +453,8 @@ class DrawRenderer {
             case 'rect':
             case 'image':
             case 'table':
+            case 'checkbox':
+            case 'inputbox':
                 return { x: el.x * scale, y: el.y * scale, w: el.w * scale, h: el.h * scale };
             case 'text':
                 return {

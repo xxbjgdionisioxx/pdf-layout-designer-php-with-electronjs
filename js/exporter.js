@@ -37,6 +37,15 @@ class BaseGenerator {
     esc(str) {
         return (str || '').replace(/'/g, "\\'");
     }
+
+    // Convert a label string to a safe snake_case DB column name
+    slugify(str) {
+        return (str || 'field')
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '_')
+            .replace(/^_+|_+$/g, '')
+            || 'field';
+    }
 }
 
 // ─────────────────────────────────────────────
@@ -113,6 +122,23 @@ class FpdfGenerator extends BaseGenerator {
                 c += `$pdf->SetFont('Arial', '', ${ptFontSize});\n`;
                 c += `$pdf->SetXY(${el.x}, ${el.y});\n`;
                 c += `$pdf->Cell(${ptCellW}, ${ptCellH}, '${ptLabel}');\n\n`;
+                break;
+            }
+
+            case 'checkbox': {
+                const cbLabel = this.esc(el.label || 'checkbox');
+                const dbCol = el.dbColumn || this.slugify(el.label || 'checkbox');
+                c += `// Checkbox: "${cbLabel}" → DB column: ${dbCol}\n`;
+                c += `$pdf->Rect(${el.x}, ${el.y}, ${el.w}, ${el.h});\n\n`;
+                break;
+            }
+
+            case 'inputbox': {
+                const ibLabel = this.esc(el.label || 'input');
+                const dbCol = el.dbColumn || this.slugify(el.label || 'input');
+                c += `// Input field: "${ibLabel}" → DB column: ${dbCol}\n`;
+                c += `$pdf->SetXY(${el.x}, ${el.y});\n`;
+                c += `$pdf->Cell(${el.w}, ${el.h}, '', 'B');\n\n`;
                 break;
             }
         }
@@ -223,6 +249,23 @@ class TcpdfGenerator extends FpdfGenerator {
                 c += `$pdf->SetFont('arial', '', ${ptFontSize});\n`;
                 c += `$pdf->SetXY(${el.x}, ${el.y});\n`;
                 c += `$pdf->Cell(${ptCellW}, ${ptCellH}, '${ptLabel}', 0, 0, 'L');\n\n`;
+                break;
+            }
+
+            case 'checkbox': {
+                const cbLabel = this.esc(el.label || 'checkbox');
+                const dbCol = el.dbColumn || this.slugify(el.label || 'checkbox');
+                c += `// Checkbox: "${cbLabel}" → DB column: ${dbCol}\n`;
+                c += `$pdf->Rect(${el.x}, ${el.y}, ${el.w}, ${el.h}, 'D');\n\n`;
+                break;
+            }
+
+            case 'inputbox': {
+                const ibLabel = this.esc(el.label || 'input');
+                const dbCol = el.dbColumn || this.slugify(el.label || 'input');
+                c += `// Input field: "${ibLabel}" → DB column: ${dbCol}\n`;
+                c += `$pdf->SetXY(${el.x}, ${el.y});\n`;
+                c += `$pdf->Cell(${el.w}, ${el.h}, '', 'B', 0, 'L');\n\n`;
                 break;
             }
         }
@@ -349,6 +392,20 @@ class DompdfGenerator extends BaseGenerator {
                 const size = el.fontSize || 11;
                 return `  <!-- Point: "${this.esc(el.label)}" -->\n` +
                     `  <div class="abs" style="left:${el.x}mm;top:${el.y}mm;font-size:${size}pt;">${this.esc(el.label)}</div>\n`;
+            }
+
+            case 'checkbox': {
+                const cbLabel = this.esc(el.label || '');
+                const dbCol = el.dbColumn || this.slugify(el.label || 'checkbox');
+                return `  <!-- Checkbox: "${cbLabel}" → DB: ${dbCol} -->\n` +
+                    `  <div class="abs" style="left:${el.x}mm;top:${el.y}mm;width:${el.w}mm;height:${el.h}mm;border:1px solid #000;display:flex;align-items:center;justify-content:center;">&#10003;</div>\n`;
+            }
+
+            case 'inputbox': {
+                const ibLabel = this.esc(el.label || '');
+                const dbCol = el.dbColumn || this.slugify(el.label || 'input');
+                return `  <!-- Input: "${ibLabel}" → DB: ${dbCol} -->\n` +
+                    `  <div class="abs" style="left:${el.x}mm;top:${el.y}mm;width:${el.w}mm;height:${el.h}mm;border-bottom:1px solid #000;"></div>\n`;
             }
         }
         return '';

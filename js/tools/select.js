@@ -172,6 +172,8 @@ class SelectTool {
             case 'rect':
             case 'image':
             case 'table':
+            case 'checkbox':
+            case 'inputbox':
                 return mmX >= el.x - margin && mmX <= el.x + el.w + margin &&
                        mmY >= el.y - margin && mmY <= el.y + el.h + margin;
             

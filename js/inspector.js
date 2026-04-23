@@ -78,6 +78,22 @@ class Inspector {
             }
         });
 
+        // Checkbox fields
+        ['sel-checkbox-label', 'sel-checkbox-col'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('input', () => this.applyFormFieldChanges('checkbox'));
+        });
+        const cbType = document.getElementById('sel-checkbox-type');
+        if (cbType) cbType.addEventListener('change', () => this.applyFormFieldChanges('checkbox'));
+
+        // Inputbox fields
+        ['sel-inputbox-label', 'sel-inputbox-col'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('input', () => this.applyFormFieldChanges('inputbox'));
+        });
+        const ibType = document.getElementById('sel-inputbox-type');
+        if (ibType) ibType.addEventListener('change', () => this.applyFormFieldChanges('inputbox'));
+
         // Delete button
         document.getElementById('btn-delete-selected').addEventListener('click', () => {
             this.deleteSelected();
@@ -127,6 +143,8 @@ class Inspector {
         document.getElementById('image-fields').style.display = el.type === 'image' ? 'block' : 'none';
         document.getElementById('table-fields').style.display = el.type === 'table' ? 'block' : 'none';
         document.getElementById('point-fields').style.display = el.type === 'point' ? 'block' : 'none';
+        document.getElementById('checkbox-fields').style.display = el.type === 'checkbox' ? 'block' : 'none';
+        document.getElementById('inputbox-fields').style.display = el.type === 'inputbox' ? 'block' : 'none';
 
         if (el.type === 'rect') {
             document.getElementById('sel-rect-label').value = el.label || '';
@@ -155,6 +173,18 @@ class Inspector {
             document.getElementById('sel-point-cell-w').value = el.cellW !== undefined ? el.cellW : 0;
             document.getElementById('sel-point-cell-h').value = el.cellH !== undefined ? el.cellH : 10;
             document.getElementById('sel-point-font-size').value = el.fontSize || 11;
+        }
+
+        if (el.type === 'checkbox') {
+            document.getElementById('sel-checkbox-label').value = el.label || '';
+            document.getElementById('sel-checkbox-col').value = el.dbColumn || '';
+            document.getElementById('sel-checkbox-type').value = el.dbType || 'BOOLEAN';
+        }
+
+        if (el.type === 'inputbox') {
+            document.getElementById('sel-inputbox-label').value = el.label || '';
+            document.getElementById('sel-inputbox-col').value = el.dbColumn || '';
+            document.getElementById('sel-inputbox-type').value = el.dbType || 'VARCHAR(255)';
         }
     }
 
@@ -229,6 +259,24 @@ class Inspector {
         state.emit('elementsChanged');
     }
 
+    applyFormFieldChanges(type) {
+        if (state.selectedElements.length === 0) return;
+        const el = state.selectedElements[0];
+        if (el.type !== type) return;
+
+        if (type === 'checkbox') {
+            el.label    = document.getElementById('sel-checkbox-label').value;
+            el.dbColumn = document.getElementById('sel-checkbox-col').value;
+            el.dbType   = document.getElementById('sel-checkbox-type').value;
+        } else if (type === 'inputbox') {
+            el.label    = document.getElementById('sel-inputbox-label').value;
+            el.dbColumn = document.getElementById('sel-inputbox-col').value;
+            el.dbType   = document.getElementById('sel-inputbox-type').value;
+        }
+
+        state.emit('elementsChanged');
+    }
+
     deleteSelected() {
         if (state.selectedElements.length === 0) return;
 
@@ -252,7 +300,7 @@ class Inspector {
             return;
         }
 
-        const icons = { rect: '▭', text: 'T', line: '╱', image: '🖼', table: '⊞', point: '◎' };
+        const icons = { rect: '▭', text: 'T', line: '╱', image: '🖼', table: '⊞', point: '◎', checkbox: '☑', inputbox: '▤' };
 
         list.innerHTML = elements.map(el => {
             const isSelected = state.selectedElements.includes(el);

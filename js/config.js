@@ -21,7 +21,7 @@ export const DEFAULTS = {
     gridVisible: true,
     snapEnabled: true,
     marginsVisible: true,
-    snapThreshold: 3, // pixels
+    snapThreshold: 3,
 };
 
 export const ZOOM_LEVELS = [0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0];
@@ -33,6 +33,8 @@ export const COLORS = {
     image: '#bc8cff',
     table: '#f778ba',
     point: '#ff6b6b',
+    checkbox: '#34d399',
+    inputbox: '#60a5fa',
     selected: '#ffd700',
     handle: '#ffffff',
     margin: 'rgba(248, 81, 73, 0.35)',
@@ -50,6 +52,8 @@ export const TOOL_TYPES = {
     LINE: 'line',
     IMAGE: 'image',
     TABLE: 'table',
+    CHECKBOX: 'checkbox',
+    INPUTBOX: 'inputbox',
 };
 
 export const ELEMENT_TYPES = {
@@ -59,4 +63,6 @@ export const ELEMENT_TYPES = {
     IMAGE: 'image',
     TABLE: 'table',
     POINT: 'point',
+    CHECKBOX: 'checkbox',
+    INPUTBOX: 'inputbox',
 };

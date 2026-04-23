@@ -190,6 +190,15 @@ if (!isset($_SESSION['user_id'])) {
                     </svg>
                     <span class="tool-label">Export</span>
                 </button>
+                <button class="tool-btn" id="btn-db-export" title="Export DB Schema (CREATE TABLE SQL)"
+                    style="color: #34d399;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <ellipse cx="12" cy="5" rx="9" ry="3" />
+                        <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
+                        <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+                    </svg>
+                    <span class="tool-label">DB Schema</span>
+                </button>
                 <button class="tool-btn" id="btn-save" title="Save Project As JSON (Ctrl+S)">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
@@ -432,6 +441,50 @@ if (!isset($_SESSION['user_id'])) {
                             </div>
                         </div>
 
+                        <!-- Checkbox-specific fields (auto-detected from PDF) -->
+                        <div id="checkbox-fields" style="display:none;">
+                            <div class="inspector-field full-width">
+                                <label for="sel-checkbox-label">Label</label>
+                                <input type="text" id="sel-checkbox-label" placeholder="e.g. Is Insured">
+                            </div>
+                            <div class="inspector-field full-width">
+                                <label for="sel-checkbox-col">DB Column Name</label>
+                                <input type="text" id="sel-checkbox-col" placeholder="auto from label">
+                            </div>
+                            <div class="inspector-field full-width">
+                                <label for="sel-checkbox-type">DB Data Type</label>
+                                <select id="sel-checkbox-type">
+                                    <option value="BOOLEAN" selected>BOOLEAN</option>
+                                    <option value="INT">INT (0/1)</option>
+                                    <option value="VARCHAR(1)">VARCHAR(1) (Y/N)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Inputbox-specific fields (auto-detected from PDF) -->
+                        <div id="inputbox-fields" style="display:none;">
+                            <div class="inspector-field full-width">
+                                <label for="sel-inputbox-label">Label</label>
+                                <input type="text" id="sel-inputbox-label" placeholder="e.g. Patient Name">
+                            </div>
+                            <div class="inspector-field full-width">
+                                <label for="sel-inputbox-col">DB Column Name</label>
+                                <input type="text" id="sel-inputbox-col" placeholder="auto from label">
+                            </div>
+                            <div class="inspector-field full-width">
+                                <label for="sel-inputbox-type">DB Data Type</label>
+                                <select id="sel-inputbox-type"
+                                    style="padding:6px 10px; background:var(--bg-color); border:1px solid var(--border-color); border-radius:6px; color:var(--text-base); font-size:13px; cursor:pointer;">
+                                    <option value="VARCHAR(255)" selected>VARCHAR(255)</option>
+                                    <option value="TEXT">TEXT</option>
+                                    <option value="INT">INT</option>
+                                    <option value="DECIMAL">DECIMAL</option>
+                                    <option value="DATE">DATE</option>
+                                    <option value="BOOLEAN">BOOLEAN</option>
+                                </select>
+                            </div>
+                        </div>
+
                         <div class="inspector-actions">
                             <button id="btn-delete-selected" class="btn-danger" title="Delete Selected (Del)">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -597,7 +650,7 @@ if (!isset($_SESSION['user_id'])) {
                         <label style="font-size:13px; color:var(--text-muted); font-weight:600; white-space:nowrap;">PDF
                             Library:</label>
                         <select id="export-library-select"
-                            style="padding:6px 10px; background:var(--bg-color); border:1px solid var(--border-color); border-radius:6px; color:var(--text-base); font-size:13px; cursor:pointer;">
+                            style="padding:6px 10px; background:var(--bg-surface); border:1px solid var(--border-default); border-radius:6px; color:var(--text-primary); font-size:13px; cursor:pointer; font-family:var(--font-sans);">
                             <option value="fpdf">FPDF — Lightweight, coordinate-based</option>
                             <option value="tcpdf">TCPDF — Feature-rich, UTF-8 support</option>
                             <option value="dompdf">Dompdf — HTML to PDF rendering</option>
@@ -737,7 +790,61 @@ if (!isset($_SESSION['user_id'])) {
         <div id="toast-container"></div>
     </div>
 
-    <script type="module" src="js/app.js?v=2"></script>
+    <!-- DB Schema Export Modal -->
+    <div id="modal-db-export" class="modal-overlay" style="display:none;">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-header">
+                <h3>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        style="vertical-align:middle;margin-right:6px;color:#34d399">
+                        <ellipse cx="12" cy="5" rx="9" ry="3" />
+                        <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
+                        <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+                    </svg>
+                    Export DB Schema
+                </h3>
+                <button class="modal-close" data-modal="modal-db-export">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px; flex-wrap:wrap;">
+                    <label style="font-size:13px; color:var(--text-muted); font-weight:600; white-space:nowrap;">DB
+                        Engine:</label>
+                    <select id="db-engine-select"
+                        style="padding:6px 10px; background:var(--bg-surface); border:1px solid var(--border-default); border-radius:6px; color:var(--text-primary); font-size:13px; cursor:pointer; font-family:var(--font-sans);">
+                        <option value="mysql" selected>MySQL</option>
+                        <option value="mariadb">MariaDB</option>
+                        <option value="postgres">PostgreSQL</option>
+                        <option value="sqlite">SQLite</option>
+                        <option value="sqlserver">SQL Server</option>
+                    </select>
+
+                    <label
+                        style="font-size:13px; color:var(--text-muted); font-weight:600; white-space:nowrap;">Table:</label>
+                    <input type="text" id="db-table-name" value="form_data" placeholder="form_data"
+                        style="padding:6px 10px; background:var(--bg-surface); border:1px solid var(--border-default); border-radius:6px; color:var(--text-primary); font-size:13px; width:140px; font-family:var(--font-sans);">
+
+                    <label
+                        style="display:flex; align-items:center; gap:6px; font-size:13px; color:var(--text-muted); cursor:pointer;">
+                        <input type="checkbox" id="db-include-timestamps" checked style="width:auto;">
+                        Timestamps
+                    </label>
+                </div>
+                <pre id="db-export-code" class="code-block" style="color:#34d399;"></pre>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-modal="modal-db-export">Close</button>
+                <button class="btn btn-primary" id="btn-copy-db-code">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="9" y="9" width="13" height="13" rx="2" />
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                    </svg>
+                    Copy SQL
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="js/app.js?v=3"></script>
 </body>
 
 </html>

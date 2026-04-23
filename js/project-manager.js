@@ -6,6 +6,8 @@ import { state } from './state.js';
 import { history } from './history.js';
 import { showToast } from './cursor.js';
 import { pdfRenderer } from './pdf-renderer.js';
+import { drawRenderer } from './draw-renderer.js';
+import { gridRenderer } from './grid.js';
 
 class ProjectManager {
     constructor() {
@@ -81,7 +83,11 @@ class ProjectManager {
         this.currentProjectId = 'proj_' + Date.now();
         localStorage.setItem('currentProjectId', this.currentProjectId);
 
+        // Repaint all three canvas layers so the old content is visually cleared
         pdfRenderer.drawBlankPage();
+        gridRenderer.render();
+        drawRenderer.render();
+
         pdfRenderer.updatePageUI();
         state.emit('elementsChanged');
 
