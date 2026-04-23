@@ -14,12 +14,15 @@ class ButtonTool {
         
         history.pushState('add button');
         
+        const w = 5;
+        const h = 5;
+        
         const el = {
             type: 'button',
-            x: parseFloat(snapped.x.toFixed(1)),
-            y: parseFloat(snapped.y.toFixed(1)),
-            w: 5, // Default width 5mm
-            h: 5, // Default height 5mm
+            x: parseFloat((snapped.x - w / 2).toFixed(1)),
+            y: parseFloat((snapped.y - h / 2).toFixed(1)),
+            w: w,
+            h: h,
             label: 'group',
             buttonType: 'radio',
             buttonValue: 'Value',

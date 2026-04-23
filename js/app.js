@@ -43,7 +43,7 @@ class App {
             button: buttonTool,
         };
     }
-    
+
     init() {
         // Initialize all modules
         canvasManager.init();
@@ -60,42 +60,42 @@ class App {
         serializer.init();
         projectManager.init();
         dbExporter.init();
-        
+
         // Bind toolbar buttons
         this.bindToolbar();
-        
+
         // Bind canvas events
         this.bindCanvasEvents();
-        
+
         // Bind page navigation
         this.bindPageNavigation();
-        
+
         // Bind modals
         this.bindModals();
-        
+
         // Bind keyboard shortcuts
         this.bindKeyboard();
-        
+
         // Bind page template selector
         this.bindPageTemplate();
-        
+
         // Bind viewport scroll for ruler sync
         this.bindViewportScroll();
-        
+
         // Bind window resize
         window.addEventListener('resize', () => {
             canvasManager.resize();
             rulerRenderer.resize();
         });
-        
+
         // Initial render
         pdfRenderer.drawBlankPage();
         gridRenderer.render();
         drawRenderer.render();
-        
+
         showToast('FPDF Layout Designer ready', 'info');
     }
-    
+
     bindToolbar() {
         // Drawing tool buttons
         const toolBtns = document.querySelectorAll('#draw-tools .tool-btn');
@@ -104,45 +104,41 @@ class App {
                 const tool = btn.dataset.tool;
                 if (tool) {
                     state.setTool(tool);
-                    
+
                     // Update active state
                     toolBtns.forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
-                    
-                    // Update cursor
-                    const drawCanvas = canvasManager.layers.draw;
-                    drawCanvas.style.cursor = tool === 'select' ? 'default' : 'crosshair';
                 }
             });
         });
-        
+
         // Grid toggle
         document.getElementById('btn-grid').addEventListener('click', () => {
             gridRenderer.toggle();
         });
-        
+
         // Grid spacing
         document.getElementById('grid-spacing').addEventListener('change', (e) => {
             gridRenderer.setSpacing(e.target.value);
         });
-        
+
         // Snap toggle
         document.getElementById('btn-snap').addEventListener('click', () => {
             state.snapEnabled = !state.snapEnabled;
             document.getElementById('btn-snap').classList.toggle('active', state.snapEnabled);
         });
-        
+
         // Margins toggle
         document.getElementById('btn-margins').addEventListener('click', () => {
             marginsRenderer.toggle();
         });
-        
+
         // Sidebar Toggles
         const btnToggleElements = document.getElementById('btn-toggle-elements');
         if (btnToggleElements) {
             btnToggleElements.addEventListener('click', () => {
                 document.getElementById('elements-panel').classList.toggle('collapsed');
-                btnToggleElements.style.transform = document.getElementById('elements-panel').classList.contains('collapsed') 
+                btnToggleElements.style.transform = document.getElementById('elements-panel').classList.contains('collapsed')
                     ? 'rotate(180deg)' : 'rotate(0deg)';
                 setTimeout(() => {
                     canvasManager.resize();
@@ -155,7 +151,7 @@ class App {
         if (btnToggleInspector) {
             btnToggleInspector.addEventListener('click', () => {
                 document.getElementById('inspector-panel').classList.toggle('collapsed');
-                btnToggleInspector.style.transform = document.getElementById('inspector-panel').classList.contains('collapsed') 
+                btnToggleInspector.style.transform = document.getElementById('inspector-panel').classList.contains('collapsed')
                     ? 'rotate(180deg)' : 'rotate(0deg)';
                 setTimeout(() => {
                     canvasManager.resize();
@@ -163,12 +159,12 @@ class App {
                 }, 300);
             });
         }
-        
+
         // Undo/Redo
         // Undo/Redo
         document.getElementById('btn-undo').addEventListener('click', () => history.undo());
         document.getElementById('btn-redo').addEventListener('click', () => history.redo());
-        
+
         // Auth Logout
         const btnLogout = document.getElementById('btn-logout');
         if (btnLogout) {
@@ -177,7 +173,7 @@ class App {
                     .then(() => window.location.href = 'login.php');
             });
         }
-        
+
         // PDF upload
         document.getElementById('pdf-upload').addEventListener('change', (e) => {
             const file = e.target.files[0];
@@ -185,91 +181,97 @@ class App {
                 pdfRenderer.loadPdf(file);
             }
         });
-        
-        // Tool change listener to sync active button
+
+        // Tool change listener to sync active button and cursor
         state.on('toolChanged', (tool) => {
             const toolBtns = document.querySelectorAll('#draw-tools .tool-btn');
             toolBtns.forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.tool === tool);
             });
+
+            // Update cursor
+            const drawCanvas = canvasManager.layers.draw;
+            if (drawCanvas) {
+                drawCanvas.style.cursor = tool === 'select' ? 'default' : 'crosshair';
+            }
         });
     }
-    
+
     bindCanvasEvents() {
         const drawCanvas = canvasManager.layers.draw;
-        
+
         drawCanvas.addEventListener('mousedown', (e) => {
             if (e.button !== 0) return; // left click only
-            
+
             const mm = canvasManager.getMouseMm(e);
             state.mouseX = mm.x;
             state.mouseY = mm.y;
-            
+
             const tool = this.tools[state.currentTool];
             if (tool) {
                 tool.onMouseDown(e, mm.x, mm.y);
             }
         });
-        
+
         drawCanvas.addEventListener('mousemove', (e) => {
             const mm = canvasManager.getMouseMm(e);
             const screen = canvasManager.getMouseScreen(e);
-            
+
             state.mouseX = mm.x;
             state.mouseY = mm.y;
             state.mouseScreenX = screen.x;
             state.mouseScreenY = screen.y;
-            
+
             // Update cursor crosshair
             cursorManager.drawCrosshair(screen.x, screen.y);
             cursorManager.updateTooltip(e, mm.x, mm.y);
             cursorManager.updateCoordDisplay(mm.x, mm.y);
-            
+
             // Update rulers
             rulerRenderer.updateCursorPos(mm.x, mm.y);
-            
+
             // Forward to tool
             const tool = this.tools[state.currentTool];
             if (tool) {
                 tool.onMouseMove(e, mm.x, mm.y);
             }
         });
-        
+
         drawCanvas.addEventListener('mouseup', (e) => {
             const mm = canvasManager.getMouseMm(e);
-            
+
             const tool = this.tools[state.currentTool];
             if (tool) {
                 tool.onMouseUp(e, mm.x, mm.y);
             }
         });
-        
+
         drawCanvas.addEventListener('mouseleave', () => {
             cursorManager.hide();
             rulerRenderer.updateCursorPos(-1, -1);
         });
-        
+
         // Click to copy coordinates (when using select tool and no element is clicked)
         drawCanvas.addEventListener('dblclick', (e) => {
             const mm = canvasManager.getMouseMm(e);
             cursorManager.showClickMarker(e);
             cursorManager.copyCoordinates(mm.x, mm.y);
         });
-        
+
         // Prevent context menu on canvas
         drawCanvas.addEventListener('contextmenu', (e) => e.preventDefault());
     }
-    
+
     bindPageNavigation() {
         document.getElementById('btn-prev-page').addEventListener('click', () => {
             pdfRenderer.prevPage();
         });
-        
+
         document.getElementById('btn-next-page').addEventListener('click', () => {
             pdfRenderer.nextPage();
         });
     }
-    
+
     bindModals() {
         // Close buttons for all modals
         document.querySelectorAll('.modal-close, .modal-overlay .btn-secondary').forEach(btn => {
@@ -280,12 +282,12 @@ class App {
                 }
             });
         });
-        
+
         // Text modal confirm
         document.getElementById('modal-text-ok').addEventListener('click', () => {
             textTool.confirmText();
         });
-        
+
         // Text modal enter key
         document.getElementById('modal-text-content').addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
@@ -293,17 +295,17 @@ class App {
                 textTool.confirmText();
             }
         });
-        
+
         // Table modal confirm
         document.getElementById('modal-table-ok').addEventListener('click', () => {
             tableTool.confirmTable();
         });
-        
+
         // Point modal confirm
         document.getElementById('modal-point-ok').addEventListener('click', () => {
             pointTool.confirmPoint();
         });
-        
+
         // Point modal enter key
         document.getElementById('modal-point-label').addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
@@ -311,7 +313,7 @@ class App {
                 pointTool.confirmPoint();
             }
         });
-        
+
         // Custom page size modal
         document.getElementById('modal-custom-ok').addEventListener('click', () => {
             const w = parseFloat(document.getElementById('custom-page-w').value);
@@ -324,7 +326,7 @@ class App {
             }
             document.getElementById('modal-custom-page').style.display = 'none';
         });
-        
+
         // Close modals on overlay click
         document.querySelectorAll('.modal-overlay').forEach(overlay => {
             overlay.addEventListener('click', (e) => {
@@ -334,14 +336,14 @@ class App {
             });
         });
     }
-    
+
     bindKeyboard() {
         document.addEventListener('keydown', (e) => {
             // Don't handle shortcuts when in input fields
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') {
                 return;
             }
-            
+
             // Tool shortcuts
             if (!e.ctrlKey && !e.metaKey) {
                 switch (e.key.toLowerCase()) {
@@ -352,6 +354,7 @@ class App {
                     case 'l': state.setTool(TOOL_TYPES.LINE); break;
                     case 'i': state.setTool(TOOL_TYPES.IMAGE); break;
                     case 'b': state.setTool(TOOL_TYPES.TABLE); break;
+                    case 'k': state.setTool(TOOL_TYPES.BUTTON); break;
                     case 'g': gridRenderer.toggle(); break;
                     case 's': {
                         state.snapEnabled = !state.snapEnabled;
@@ -376,7 +379,7 @@ class App {
                         break;
                 }
             }
-            
+
             // Ctrl shortcuts
             if (e.ctrlKey || e.metaKey) {
                 switch (e.key.toLowerCase()) {
@@ -391,6 +394,10 @@ class App {
                     case 'y':
                         e.preventDefault();
                         history.redo();
+                        break;
+                    case 'b':
+                        e.preventDefault();
+                        state.setTool(TOOL_TYPES.BUTTON);
                         break;
                     case 's':
                         e.preventDefault();
@@ -420,12 +427,12 @@ class App {
             }
         });
     }
-    
+
     bindPageTemplate() {
         const select = document.getElementById('page-size-select');
         select.addEventListener('change', () => {
             const value = select.value;
-            
+
             if (value === 'custom') {
                 // Show custom size modal
                 document.getElementById('custom-page-w').value = state.pageWidth;
@@ -433,7 +440,7 @@ class App {
                 document.getElementById('modal-custom-page').style.display = 'flex';
                 return;
             }
-            
+
             const template = PAGE_TEMPLATES[value];
             if (template) {
                 state.pageTemplate = value;
@@ -444,13 +451,13 @@ class App {
             }
         });
     }
-    
+
     bindViewportScroll() {
         const viewport = document.getElementById('canvas-viewport');
         viewport.addEventListener('scroll', () => {
             rulerRenderer.render();
         });
-        
+
         // Mouse wheel zoom
         viewport.addEventListener('wheel', (e) => {
             if (e.ctrlKey) {

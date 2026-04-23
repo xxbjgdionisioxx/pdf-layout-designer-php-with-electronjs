@@ -120,7 +120,7 @@ if (!isset($_SESSION['user_id'])) {
                     </svg>
                     <span class="tool-label">Table</span>
                 </button>
-                <button class="tool-btn" id="btn-button" title="Button Group" data-tool="button">
+                <button class="tool-btn" id="btn-button" title="Button Tool (K or Ctrl+B)" data-tool="button">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="9" />
                         <circle cx="12" cy="12" r="4" fill="currentColor" />
