@@ -61,7 +61,7 @@
     /* Layout */
     --toolbar-height: 52px;
     --ruler-size: 28px;
-    --inspector-width: 260px;
+    --sidebar-width: 260px;
     --bottom-bar-height: 36px;
 
     /* Misc */
@@ -298,13 +298,14 @@ input[type=number]::-webkit-outer-spin-button {
 #main-layout {
     flex: 1;
     display: grid;
-    grid-template-columns: var(--ruler-size) 1fr var(--inspector-width);
+    grid-template-columns: var(--ruler-size) 1fr auto auto;
     grid-template-rows: var(--ruler-size) 1fr;
     grid-template-areas:
-        "corner  hruler   inspector"
-        "vruler  canvas   inspector";
+        "corner  hruler   elements  inspector"
+        "vruler  canvas   elements  inspector";
     overflow: hidden;
     position: relative;
+    background: var(--bg-primary);
 }
 
 /* Ruler Corner */
@@ -409,15 +410,39 @@ input[type=number]::-webkit-outer-spin-button {
     cursor: crosshair;
 }
 
-/* ============ INSPECTOR PANEL ============ */
-#inspector-panel {
-    grid-area: inspector;
+/* ============ SIDEBAR PANELS ============ */
+.sidebar {
     background: var(--bg-secondary);
     border-left: 1px solid var(--border-default);
     overflow-y: auto;
     overflow-x: hidden;
     z-index: 50;
-    transition: width var(--transition-normal);
+    transition: width var(--transition-normal), opacity var(--transition-normal), border var(--transition-normal);
+    width: var(--sidebar-width);
+}
+
+.sidebar.collapsed {
+    width: 36px;
+    overflow: hidden;
+}
+
+.sidebar.collapsed .inspector-header h2,
+.sidebar.collapsed .inspector-content {
+    display: none;
+}
+
+.sidebar.collapsed .inspector-header {
+    padding: 10px 0;
+    justify-content: center;
+    border-bottom: none;
+}
+
+#elements-panel {
+    grid-area: elements;
+}
+
+#inspector-panel {
+    grid-area: inspector;
 }
 
 .inspector-header {
@@ -536,6 +561,15 @@ input[type=number]::-webkit-outer-spin-button {
     font-size: 11px;
     width: 100%;
     transition: border var(--transition-fast);
+}
+
+.inspector-field select {
+    padding-right: 24px;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238b949e' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 6px center;
 }
 
 .inspector-field input:focus,

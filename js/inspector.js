@@ -79,20 +79,21 @@ class Inspector {
         });
 
         // Checkbox fields
-        ['sel-checkbox-label', 'sel-checkbox-col'].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.addEventListener('input', () => this.applyFormFieldChanges('checkbox'));
-        });
-        const cbType = document.getElementById('sel-checkbox-type');
-        if (cbType) cbType.addEventListener('change', () => this.applyFormFieldChanges('checkbox'));
+        const cbLabel = document.getElementById('sel-checkbox-label');
+        if (cbLabel) cbLabel.addEventListener('input', () => this.applyFormFieldChanges('checkbox'));
 
         // Inputbox fields
-        ['sel-inputbox-label', 'sel-inputbox-col'].forEach(id => {
+        const ibLabel = document.getElementById('sel-inputbox-label');
+        if (ibLabel) ibLabel.addEventListener('input', () => this.applyFormFieldChanges('inputbox'));
+
+        // Global DB fields
+        ['sel-global-db-col', 'sel-global-db-type'].forEach(id => {
             const el = document.getElementById(id);
-            if (el) el.addEventListener('input', () => this.applyFormFieldChanges('inputbox'));
+            if (el) {
+                el.addEventListener('input', () => this.applyGlobalDbChanges());
+                el.addEventListener('change', () => this.applyGlobalDbChanges());
+            }
         });
-        const ibType = document.getElementById('sel-inputbox-type');
-        if (ibType) ibType.addEventListener('change', () => this.applyFormFieldChanges('inputbox'));
 
         // Button fields
         ['sel-button-label', 'sel-button-value'].forEach(id => {
@@ -198,20 +199,25 @@ class Inspector {
 
         if (el.type === 'checkbox') {
             document.getElementById('sel-checkbox-label').value = el.label || '';
-            document.getElementById('sel-checkbox-col').value = el.dbColumn || '';
-            document.getElementById('sel-checkbox-type').value = el.dbType || 'BOOLEAN';
         }
 
         if (el.type === 'inputbox') {
             document.getElementById('sel-inputbox-label').value = el.label || '';
-            document.getElementById('sel-inputbox-col').value = el.dbColumn || '';
-            document.getElementById('sel-inputbox-type').value = el.dbType || 'VARCHAR(255)';
         }
 
         if (el.type === 'button') {
             document.getElementById('sel-button-label').value = el.label || '';
             document.getElementById('sel-button-type').value = el.buttonType || 'radio';
             document.getElementById('sel-button-value').value = el.buttonValue || '';
+        }
+
+        // Global DB properties
+        if (el.type !== 'line') {
+            document.getElementById('global-db-fields').style.display = 'block';
+            document.getElementById('sel-global-db-col').value = el.dbColumn || '';
+            document.getElementById('sel-global-db-type').value = el.dbType || '';
+        } else {
+            document.getElementById('global-db-fields').style.display = 'none';
         }
     }
 
@@ -292,18 +298,25 @@ class Inspector {
         if (el.type !== type) return;
 
         if (type === 'checkbox') {
-            el.label    = document.getElementById('sel-checkbox-label').value;
-            el.dbColumn = document.getElementById('sel-checkbox-col').value;
-            el.dbType   = document.getElementById('sel-checkbox-type').value;
+            el.label = document.getElementById('sel-checkbox-label').value;
         } else if (type === 'inputbox') {
-            el.label    = document.getElementById('sel-inputbox-label').value;
-            el.dbColumn = document.getElementById('sel-inputbox-col').value;
-            el.dbType   = document.getElementById('sel-inputbox-type').value;
+            el.label = document.getElementById('sel-inputbox-label').value;
         } else if (type === 'button') {
             el.label       = document.getElementById('sel-button-label').value;
             el.buttonType  = document.getElementById('sel-button-type').value;
             el.buttonValue = document.getElementById('sel-button-value').value;
         }
+
+        state.emit('elementsChanged');
+    }
+
+    applyGlobalDbChanges() {
+        if (state.selectedElements.length === 0) return;
+        const el = state.selectedElements[0];
+        if (el.type === 'line') return;
+
+        el.dbColumn = document.getElementById('sel-global-db-col').value;
+        el.dbType = document.getElementById('sel-global-db-type').value;
 
         state.emit('elementsChanged');
     }

@@ -279,8 +279,36 @@ if (!isset($_SESSION['user_id'])) {
                 </div>
             </div>
 
+            <!-- Elements Sidebar -->
+            <aside id="elements-panel" class="sidebar">
+                <div class="inspector-header">
+                    <h2>Elements</h2>
+                    <button id="btn-toggle-elements" class="icon-btn" title="Toggle Elements List">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="15 18 9 12 15 6" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="inspector-content">
+                    <div class="inspector-section">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <h3 style="margin: 0;">Elements <span id="element-count" class="badge">0</span></h3>
+                            <button id="btn-delete-all" class="icon-btn" style="color: var(--danger-color); padding: 4px; display: none;" title="Delete All Elements">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="3 6 5 6 21 6" />
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div id="elements-list" class="elements-list">
+                            <p class="no-elements">No elements on this page</p>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
             <!-- Inspector Panel -->
-            <aside id="inspector-panel">
+            <aside id="inspector-panel" class="sidebar">
                 <div class="inspector-header">
                     <h2>Inspector</h2>
                     <button id="btn-toggle-inspector" class="icon-btn" title="Toggle Inspector">
@@ -454,18 +482,6 @@ if (!isset($_SESSION['user_id'])) {
                                 <label for="sel-checkbox-label">Label</label>
                                 <input type="text" id="sel-checkbox-label" placeholder="e.g. Is Insured">
                             </div>
-                            <div class="inspector-field full-width">
-                                <label for="sel-checkbox-col">DB Column Name</label>
-                                <input type="text" id="sel-checkbox-col" placeholder="auto from label">
-                            </div>
-                            <div class="inspector-field full-width">
-                                <label for="sel-checkbox-type">DB Data Type</label>
-                                <select id="sel-checkbox-type">
-                                    <option value="BOOLEAN" selected>BOOLEAN</option>
-                                    <option value="INT">INT (0/1)</option>
-                                    <option value="VARCHAR(1)">VARCHAR(1) (Y/N)</option>
-                                </select>
-                            </div>
                         </div>
 
                         <!-- Inputbox-specific fields (auto-detected from PDF) -->
@@ -474,24 +490,7 @@ if (!isset($_SESSION['user_id'])) {
                                 <label for="sel-inputbox-label">Label</label>
                                 <input type="text" id="sel-inputbox-label" placeholder="e.g. Patient Name">
                             </div>
-                            <div class="inspector-field full-width">
-                                <label for="sel-inputbox-col">DB Column Name</label>
-                                <input type="text" id="sel-inputbox-col" placeholder="auto from label">
-                            </div>
-                            <div class="inspector-field full-width">
-                                <label for="sel-inputbox-type">DB Data Type</label>
-                                <select id="sel-inputbox-type"
-                                    style="padding:6px 10px; background:var(--bg-color); border:1px solid var(--border-color); border-radius:6px; color:var(--text-base); font-size:13px; cursor:pointer;">
-                                    <option value="VARCHAR(255)" selected>VARCHAR(255)</option>
-                                    <option value="TEXT">TEXT</option>
-                                    <option value="INT">INT</option>
-                                    <option value="DECIMAL">DECIMAL</option>
-                                    <option value="DATE">DATE</option>
-                                    <option value="BOOLEAN">BOOLEAN</option>
-                                </select>
-                            </div>
                         </div>
-
                         <!-- Button Group Fields -->
                         <div id="button-fields" style="display:none;">
                             <div class="inspector-field full-width">
@@ -514,6 +513,28 @@ if (!isset($_SESSION['user_id'])) {
                                 <button id="btn-clone-button" class="btn-primary" style="width: 100%; padding: 6px; font-size: 12px;">
                                     + Add Option (Clone)
                                 </button>
+                            </div>
+                        </div>
+                        <!-- Global Database Export Settings -->
+                        <div id="global-db-fields" style="display:none; padding-top: 15px; margin-top: 15px; border-top: 1px solid var(--border-default);">
+                            <h4 style="margin: 0 0 10px 0; font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Database Schema Settings</h4>
+                            <div class="inspector-field full-width">
+                                <label for="sel-global-db-col">DB Column Name</label>
+                                <input type="text" id="sel-global-db-col" placeholder="Auto-generated from label">
+                            </div>
+                            <div class="inspector-field full-width">
+                                <label for="sel-global-db-type">DB Data Type</label>
+                                <select id="sel-global-db-type">
+                                    <option value="">Default (Auto)</option>
+                                    <option value="VARCHAR(255)">VARCHAR(255)</option>
+                                    <option value="TEXT">TEXT</option>
+                                    <option value="INT">INT</option>
+                                    <option value="DECIMAL(18,2)">DECIMAL(18,2)</option>
+                                    <option value="DATE">DATE</option>
+                                    <option value="DATETIME">DATETIME</option>
+                                    <option value="BOOLEAN">BOOLEAN</option>
+                                    <option value="VARCHAR(1)">VARCHAR(1) (Y/N)</option>
+                                </select>
                             </div>
                         </div>
 
@@ -542,21 +563,6 @@ if (!isset($_SESSION['user_id'])) {
                         </div>
                     </div>
 
-                    <!-- Elements List -->
-                    <div class="inspector-section">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                            <h3 style="margin: 0;">Elements <span id="element-count" class="badge">0</span></h3>
-                            <button id="btn-delete-all" class="icon-btn" style="color: var(--danger-color); padding: 4px; display: none;" title="Delete All Elements">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <polyline points="3 6 5 6 21 6" />
-                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                                </svg>
-                            </button>
-                        </div>
-                        <div id="elements-list" class="elements-list">
-                            <p class="no-elements">No elements on this page</p>
-                        </div>
-                    </div>
                 </div>
             </aside>
         </div>

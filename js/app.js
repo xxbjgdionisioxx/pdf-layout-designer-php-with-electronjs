@@ -137,6 +137,33 @@ class App {
             marginsRenderer.toggle();
         });
         
+        // Sidebar Toggles
+        const btnToggleElements = document.getElementById('btn-toggle-elements');
+        if (btnToggleElements) {
+            btnToggleElements.addEventListener('click', () => {
+                document.getElementById('elements-panel').classList.toggle('collapsed');
+                btnToggleElements.style.transform = document.getElementById('elements-panel').classList.contains('collapsed') 
+                    ? 'rotate(180deg)' : 'rotate(0deg)';
+                setTimeout(() => {
+                    canvasManager.resize();
+                    rulerRenderer.resize();
+                }, 300);
+            });
+        }
+
+        const btnToggleInspector = document.getElementById('btn-toggle-inspector');
+        if (btnToggleInspector) {
+            btnToggleInspector.addEventListener('click', () => {
+                document.getElementById('inspector-panel').classList.toggle('collapsed');
+                btnToggleInspector.style.transform = document.getElementById('inspector-panel').classList.contains('collapsed') 
+                    ? 'rotate(180deg)' : 'rotate(0deg)';
+                setTimeout(() => {
+                    canvasManager.resize();
+                    rulerRenderer.resize();
+                }, 300);
+            });
+        }
+        
         // Undo/Redo
         // Undo/Redo
         document.getElementById('btn-undo').addEventListener('click', () => history.undo());
