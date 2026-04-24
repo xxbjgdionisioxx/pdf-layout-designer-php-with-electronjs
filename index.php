@@ -509,8 +509,7 @@ if (!isset($_SESSION['user_id'])) {
                             </div>
                             <div class="inspector-field full-width">
                                 <label for="sel-button-type">Button Style</label>
-                                <select id="sel-button-type"
-                                    style="padding:6px 10px; background:var(--bg-surface); border:1px solid var(--border-default); border-radius:6px; color:var(--text-primary); font-size:13px; cursor:pointer;">
+                                <select id="sel-button-type">
                                     <option value="radio" selected>Radio (Single Choice)</option>
                                     <option value="checkbox">Checkbox (Multi Choice)</option>
                                 </select>
