@@ -19,6 +19,7 @@ A professional, multi-user **web + desktop** visual designer for creating PHP PD
 ![New Project Page](images/new-project.png)
 ![Add Point Marker](images/add-point-marker.png)
 ![Add Table](images/table-loop-mode.png)
+![Add Image](images/add-image.png)
 ![Export FPDF](images/export-fpdf.png) 
 ![Export mPDF](images/export-mpdf.png)
 ![Export database](images/export-db.png)
