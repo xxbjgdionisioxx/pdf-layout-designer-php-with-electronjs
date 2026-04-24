@@ -113,6 +113,11 @@ class Inspector {
             this.cloneSelected();
         });
 
+        // Delete Selected (from list)
+        document.getElementById('btn-delete-selected-list')?.addEventListener('click', () => {
+            this.deleteSelected();
+        });
+
         // Delete All button
         document.getElementById('btn-delete-all')?.addEventListener('click', () => {
             if (confirm('Are you sure you want to delete ALL elements on this page?')) {
@@ -122,6 +127,8 @@ class Inspector {
     }
 
     update() {
+        this.updateElementsList();
+
         const selSection = document.getElementById('selection-section');
         const noSelSection = document.getElementById('no-selection-section');
 
@@ -373,6 +380,11 @@ class Inspector {
 
         count.textContent = elements.length;
 
+        const btnDeleteSelectedList = document.getElementById('btn-delete-selected-list');
+        if (btnDeleteSelectedList) {
+            btnDeleteSelectedList.style.display = state.selectedElements.length > 0 ? 'inline-flex' : 'none';
+        }
+
         const btnDeleteAll = document.getElementById('btn-delete-all');
         if (btnDeleteAll) {
             btnDeleteAll.style.display = elements.length > 0 ? 'inline-flex' : 'none';
@@ -388,12 +400,11 @@ class Inspector {
         list.innerHTML = elements.map(el => {
             const isSelected = state.selectedElements.includes(el);
             const icon = icons[el.type] || '?';
-            let name = el.type.charAt(0).toUpperCase() + el.type.slice(1);
-            if (el.type === 'text' && el.content) {
+            
+            // Use label (Group Name) if available, otherwise fallback to content or type
+            let name = el.label || el.type.charAt(0).toUpperCase() + el.type.slice(1);
+            if (!el.label && el.type === 'text' && el.content) {
                 name = el.content.substring(0, 16);
-            }
-            if (el.type === 'image' && el.label) {
-                name = el.label;
             }
             if (el.type === 'point' && el.label) {
                 name = '◎ ' + el.label.substring(0, 14);
@@ -413,13 +424,25 @@ class Inspector {
             </div>`;
         }).join('');
 
-        // Click handlers
-        list.querySelectorAll('.element-item').forEach(item => {
+        // Click handlers for multi-selection
+        list.querySelectorAll('.element-item').forEach((item, index) => {
             item.addEventListener('click', (e) => {
                 const id = parseInt(item.dataset.id);
                 const el = elements.find(el => el.id === id);
-                if (el) {
-                    state.selectElement(el, e.shiftKey);
+                if (!el) return;
+
+                if (e.shiftKey && state.selectedElements.length > 0) {
+                    // Range selection
+                    const lastEl = state.selectedElements[state.selectedElements.length - 1];
+                    const lastIdx = elements.indexOf(lastEl);
+                    const start = Math.min(index, lastIdx);
+                    const end = Math.max(index, lastIdx);
+                    
+                    const range = elements.slice(start, end + 1);
+                    range.forEach(rel => state.selectElement(rel, true));
+                } else {
+                    // Single select or Ctrl toggle
+                    state.selectElement(el, e.ctrlKey || e.metaKey);
                 }
             });
         });

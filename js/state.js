@@ -115,7 +115,10 @@ class AppState {
     
     selectElement(element, addToSelection = false) {
         if (addToSelection) {
-            if (!this.selectedElements.includes(element)) {
+            const index = this.selectedElements.indexOf(element);
+            if (index !== -1) {
+                this.selectedElements.splice(index, 1);
+            } else {
                 this.selectedElements.push(element);
             }
         } else {

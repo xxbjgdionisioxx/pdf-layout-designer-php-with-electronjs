@@ -419,6 +419,8 @@ input[type=number]::-webkit-outer-spin-button {
     z-index: 50;
     transition: width var(--transition-normal), opacity var(--transition-normal), border var(--transition-normal);
     width: var(--sidebar-width);
+    display: flex;
+    flex-direction: column;
 }
 
 .sidebar.collapsed {
@@ -467,10 +469,13 @@ input[type=number]::-webkit-outer-spin-button {
 
 .inspector-content {
     padding: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
 }
 
 .inspector-section {
-    border-bottom: 1px solid var(--border-muted);
     padding: 12px;
 }
 
@@ -636,10 +641,10 @@ input[type=number]::-webkit-outer-spin-button {
     line-height: 1.4;
 }
 
-/* Elements List */
 .elements-list {
-    max-height: 200px;
+    flex: 1;
     overflow-y: auto;
+    min-height: 200px;
 }
 
 .no-elements {

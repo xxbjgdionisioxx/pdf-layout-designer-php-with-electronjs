@@ -30,9 +30,6 @@ class ButtonTool {
         
         state.addElement(el);
         state.selectElement(el);
-        
-        // Automatically switch back to select tool so they can immediately adjust or clone
-        state.setTool('select');
     }
     
     onMouseMove(e, mmX, mmY) {

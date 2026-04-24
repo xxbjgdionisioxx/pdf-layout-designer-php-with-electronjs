@@ -293,12 +293,22 @@ if (!isset($_SESSION['user_id'])) {
                     <div class="inspector-section">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                             <h3 style="margin: 0;">Elements <span id="element-count" class="badge">0</span></h3>
-                            <button id="btn-delete-all" class="icon-btn" style="color: var(--danger-color); padding: 4px; display: none;" title="Delete All Elements">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <polyline points="3 6 5 6 21 6" />
-                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                                </svg>
-                            </button>
+                            <div style="display: flex; gap: 4px;">
+                                <button id="btn-delete-selected-list" class="icon-btn" style="color: var(--accent-danger); padding: 4px; display: none;" title="Delete Selected Elements">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="3 6 5 6 21 6" />
+                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                    </svg>
+                                </button>
+                                <button id="btn-delete-all" class="icon-btn" style="color: var(--accent-danger); padding: 4px; display: none;" title="Delete All Elements">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="3 6 5 6 21 6" />
+                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                        <line x1="10" y1="11" x2="10" y2="17" />
+                                        <line x1="14" y1="11" x2="14" y2="17" />
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
                         <div id="elements-list" class="elements-list">
                             <p class="no-elements">No elements on this page</p>
