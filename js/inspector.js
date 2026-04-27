@@ -141,11 +141,31 @@ class Inspector {
         selSection.style.display = 'block';
         noSelSection.style.display = 'none';
 
-        this.updateSelectionFields();
+        if (state.selectedElements.length > 1) {
+            this.updateMultiSelectionSummary();
+        } else {
+            this.updateSelectionFields();
+        }
+    }
+
+    updateMultiSelectionSummary() {
+        const count = state.selectedElements.length;
+        document.getElementById('sel-type').textContent = `${count} Objects Selected`;
+        
+        // Hide all type-specific fields
+        const sections = ['rect-fields', 'text-fields', 'image-fields', 'table-fields', 'point-fields', 'checkbox-fields', 'inputbox-fields', 'button-fields', 'global-db-fields'];
+        sections.forEach(id => document.getElementById(id).style.display = 'none');
+
+        // Clear and disable position fields for now (multi-move is supported via dragging on canvas)
+        document.getElementById('sel-x').value = '';
+        document.getElementById('sel-y').value = '';
+        document.getElementById('sel-w').value = '';
+        document.getElementById('sel-h').value = '';
     }
 
     updateSelectionFields() {
         if (state.selectedElements.length === 0) return;
+        if (state.selectedElements.length > 1) return;
 
         const el = state.selectedElements[0]; // Primary selection
 

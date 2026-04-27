@@ -163,6 +163,32 @@ class App {
             });
         }
 
+        // Database Explorer Toggle
+        const btnToggleDb = document.getElementById('btn-toggle-db-explorer');
+        const dbExplorerPanel = document.getElementById('db-explorer');
+        if (btnToggleDb && dbExplorerPanel) {
+            btnToggleDb.addEventListener('click', () => {
+                dbExplorerPanel.classList.toggle('collapsed');
+                btnToggleDb.classList.toggle('active', !dbExplorerPanel.classList.contains('collapsed'));
+                setTimeout(() => {
+                    canvasManager.resize();
+                    rulerRenderer.resize();
+                }, 300);
+            });
+        }
+
+        const btnToggleDbSidebar = document.getElementById('btn-toggle-db-sidebar');
+        if (btnToggleDbSidebar && dbExplorerPanel) {
+            btnToggleDbSidebar.addEventListener('click', () => {
+                dbExplorerPanel.classList.toggle('collapsed');
+                btnToggleDb.classList.toggle('active', !dbExplorerPanel.classList.contains('collapsed'));
+                setTimeout(() => {
+                    canvasManager.resize();
+                    rulerRenderer.resize();
+                }, 300);
+            });
+        }
+
         // Undo/Redo
         // Undo/Redo
         document.getElementById('btn-undo').addEventListener('click', () => history.undo());
@@ -288,27 +314,24 @@ class App {
     }
 
     handleDbColumnDrop(data, x, y) {
-        // Create a table element with one row and one column for the dropped field
-        const table = {
-            type: 'table',
+        // Create a text element for the dropped column
+        const textElement = {
+            type: 'text',
             x: x,
             y: y,
-            w: 50, // default width
-            h: 12, // default height
-            rows: 2, // 1 header + 1 data row
-            cols: 1,
-            label: `${data.table}.${data.column}`,
+            w: 60, // default width
+            h: 8,  // default height
+            content: `$${data.column}`,
+            label: data.column,
             dbColumn: data.column,
             dbTable: data.table,
             dbType: data.dataType,
-            loop: false,
-            // Custom properties for table tool
-            headers: [data.column],
-            colWidths: [50]
+            fontSize: 11,
+            fontStyle: ''
         };
         
-        state.addElement(table);
-        showToast(`Linked ${data.column} to new table element`, 'success');
+        state.addElement(textElement);
+        showToast(`Added ${data.column} as text element`, 'success');
     }
 
     bindPageNavigation() {

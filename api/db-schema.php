@@ -21,58 +21,84 @@ if (!isset($_SESSION['user_id'])) {
 $json = file_get_contents('php://input');
 $config = json_decode($json, true);
 
-if (!$config || !isset($config['host'], $config['port'], $config['user'], $config['password'], $config['dbname'])) {
+if (!$config || !isset($config['driver'], $config['dbname'])) {
     http_response_code(400);
     echo "Bad Request: Missing connection parameters.";
     exit;
 }
 
-$host = $config['host'];
-$port = $config['port'];
-$user = $config['user'];
-$pass = $config['password'];
+$driver = $config['driver'];
+$host = $config['host'] ?? '';
+$port = $config['port'] ?? '';
+$user = $config['user'] ?? '';
+$pass = $config['password'] ?? '';
 $dbname = $config['dbname'];
 
 try {
-    // We only support MySQL for now
-    $dsn = "mysql:host=$host;port=$port;dbname=$dbname;charset=utf8mb4";
+    $dsn = "";
+    if ($driver === 'mysql') {
+        $dsn = "mysql:host=$host;port=$port;dbname=$dbname;charset=utf8mb4";
+    } elseif ($driver === 'pgsql') {
+        $dsn = "pgsql:host=$host;port=$port;dbname=$dbname";
+    } elseif ($driver === 'sqlite') {
+        $dsn = "sqlite:$dbname";
+    } else {
+        throw new Exception("Unsupported driver: $driver");
+    }
+
     $pdo = new PDO($dsn, $user, $pass, [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
     ]);
 
-    // Fetch tables
-    $tablesQuery = $pdo->query("SHOW TABLES");
-    $tables = $tablesQuery->fetchAll(PDO::FETCH_COLUMN);
+    $schema = ['tables' => []];
 
-    $schema = [
-        'tables' => []
-    ];
+    if ($driver === 'mysql' || $driver === 'mariadb') {
+        $tablesQuery = $pdo->query("SHOW TABLES");
+        $tables = $tablesQuery->fetchAll(PDO::FETCH_COLUMN);
 
-    foreach ($tables as $tableName) {
-        // Fetch columns for each table
-        $columnsQuery = $pdo->query("SHOW COLUMNS FROM `$tableName`");
-        $columnsData = $columnsQuery->fetchAll();
-
-        $columns = [];
-        foreach ($columnsData as $col) {
-            $columns[] = [
-                'name' => $col['Field'],
-                'type' => $col['Type']
-            ];
+        foreach ($tables as $tableName) {
+            $columnsQuery = $pdo->query("SHOW COLUMNS FROM `$tableName`");
+            $columnsData = $columnsQuery->fetchAll();
+            $columns = [];
+            foreach ($columnsData as $col) {
+                $columns[] = ['name' => $col['Field'], 'type' => $col['Type']];
+            }
+            $schema['tables'][] = ['name' => $tableName, 'columns' => $columns];
         }
+    } elseif ($driver === 'pgsql') {
+        $tablesQuery = $pdo->query("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'");
+        $tables = $tablesQuery->fetchAll(PDO::FETCH_COLUMN);
 
-        $schema['tables'][] = [
-            'name' => $tableName,
-            'columns' => $columns
-        ];
+        foreach ($tables as $tableName) {
+            $stmt = $pdo->prepare("SELECT column_name, data_type FROM information_schema.columns WHERE table_name = ?");
+            $stmt->execute([$tableName]);
+            $columnsData = $stmt->fetchAll();
+            $columns = [];
+            foreach ($columnsData as $col) {
+                $columns[] = ['name' => $col['column_name'], 'type' => $col['data_type']];
+            }
+            $schema['tables'][] = ['name' => $tableName, 'columns' => $columns];
+        }
+    } elseif ($driver === 'sqlite') {
+        $tablesQuery = $pdo->query("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'");
+        $tables = $tablesQuery->fetchAll(PDO::FETCH_COLUMN);
+
+        foreach ($tables as $tableName) {
+            $columnsQuery = $pdo->query("PRAGMA table_info(`$tableName`)");
+            $columnsData = $columnsQuery->fetchAll();
+            $columns = [];
+            foreach ($columnsData as $col) {
+                $columns[] = ['name' => $col['name'], 'type' => $col['type']];
+            }
+            $schema['tables'][] = ['name' => $tableName, 'columns' => $columns];
+        }
     }
 
-    // Return the schema
     header('Content-Type: application/json');
     echo json_encode($schema);
 
-} catch (PDOException $e) {
+} catch (Exception $e) {
     http_response_code(500);
     echo "Database Error: " . $e->getMessage();
 }

@@ -13,6 +13,8 @@ class SelectTool {
     constructor() {
         this.dragStartMm = null;
         this.dragOffsets = null; // offsets for each selected element
+        this.isMarquee = false;
+        this.marqueeStart = null;
         this.resizeStartEl = null;
         this.resizeHandle = null;
         this.resizeStartBounds = null;
@@ -76,7 +78,12 @@ class SelectTool {
             
             history.pushState('move');
         } else {
-            state.clearSelection();
+            // Start marquee selection
+            this.isMarquee = true;
+            this.marqueeStart = { x: mmX, y: mmY };
+            if (!e.shiftKey) {
+                state.clearSelection();
+            }
         }
     }
     
@@ -110,6 +117,16 @@ class SelectTool {
             });
             
             state.emit('elementsChanged');
+            return;
+        }
+
+        // Handle marquee
+        if (this.isMarquee) {
+            state.selectionMarquee = {
+                start: this.marqueeStart,
+                end: { x: mmX, y: mmY }
+            };
+            state.emit('elementsChanged'); // Re-render marquee
             return;
         }
         
@@ -152,14 +169,52 @@ class SelectTool {
     }
     
     onMouseUp(e, mmX, mmY) {
+        if (this.isMarquee) {
+            const marquee = state.selectionMarquee;
+            if (marquee) {
+                const elements = state.getPageElements();
+                elements.forEach(el => {
+                    if (this.isInsideMarquee(el, marquee)) {
+                        state.selectElement(el, true);
+                    }
+                });
+            }
+        }
+
         state.isDragging = false;
         state.isResizing = false;
+        this.isMarquee = false;
+        this.marqueeStart = null;
+        state.selectionMarquee = null;
         this.dragStartMm = null;
         this.dragOffsets = null;
         this.resizeHandle = null;
         this.resizeStartEl = null;
         
         state.emit('selectionChanged');
+        state.emit('elementsChanged');
+    }
+
+    isInsideMarquee(el, marquee) {
+        const x1 = Math.min(marquee.start.x, marquee.end.x);
+        const y1 = Math.min(marquee.start.y, marquee.end.y);
+        const x2 = Math.max(marquee.start.x, marquee.end.x);
+        const y2 = Math.max(marquee.start.y, marquee.end.y);
+
+        if (el.type === 'line') {
+            const ex1 = Math.min(el.x1, el.x2);
+            const ey1 = Math.min(el.y1, el.y2);
+            const ex2 = Math.max(el.x1, el.x2);
+            const ey2 = Math.max(el.y1, el.y2);
+            return ex1 >= x1 && ex2 <= x2 && ey1 >= y1 && ey2 <= y2;
+        }
+
+        const ex1 = el.x;
+        const ey1 = el.y;
+        const ex2 = el.x + (el.w || 0);
+        const ey2 = el.y + (el.h || 0);
+
+        return ex1 >= x1 && ex2 <= x2 && ey1 >= y1 && ey2 <= y2;
     }
     
     /**

@@ -39,6 +39,11 @@ class DrawRenderer {
             this.drawHandles(ctx, el, scale);
         }
 
+        // Draw marquee selection box
+        if (state.selectionMarquee) {
+            this.drawMarquee(ctx, state.selectionMarquee, scale);
+        }
+
         ctx.restore();
     }
 
@@ -458,6 +463,24 @@ class DrawRenderer {
         ctx.textAlign = 'left';
         ctx.textBaseline = 'bottom';
         ctx.fillText(`${labelText} ${valText}`, x, y - 2);
+        ctx.restore();
+    }
+
+    drawMarquee(ctx, marquee, scale) {
+        const { start, end } = marquee;
+        const x = Math.min(start.x, end.x) * scale;
+        const y = Math.min(start.y, end.y) * scale;
+        const w = Math.abs(end.x - start.x) * scale;
+        const h = Math.abs(end.y - start.y) * scale;
+
+        ctx.save();
+        ctx.strokeStyle = state.selectedElements.length > 0 ? '#58a6ff' : '#58a6ff';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([5, 5]);
+        ctx.fillStyle = 'rgba(88, 166, 255, 0.15)';
+        
+        ctx.fillRect(x, y, w, h);
+        ctx.strokeRect(x, y, w, h);
         ctx.restore();
     }
 

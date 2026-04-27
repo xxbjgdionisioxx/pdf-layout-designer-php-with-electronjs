@@ -46,6 +46,33 @@ class BaseGenerator {
             .replace(/^_+|_+$/g, '')
             || 'field';
     }
+
+    getUsedTables() {
+        const tables = new Set();
+        for (const [pageNum, elements] of state.elements) {
+            for (const el of elements) {
+                if (el.dbTable) tables.add(el.dbTable);
+            }
+        }
+        return Array.from(tables);
+    }
+
+    buildDbFetch() {
+        const tables = this.getUsedTables();
+        if (tables.length === 0) return "";
+
+        let code = "// --- Database Fetch ---\n";
+        code += "$DB = new Database(); // Replace with your DB connection\n\n";
+
+        for (const table of tables) {
+            const varName = this.slugify(table);
+            const rsName = "$rs" + varName.charAt(0).toUpperCase() + varName.slice(1);
+            const pkName = table.toLowerCase().replace(/^tbl/, '') + "id"; // common pattern
+            code += `${rsName} = $DB->Execute("SELECT * FROM ${table} WHERE ${pkName} = '$x${pkName}'");\n`;
+        }
+        code += "\n";
+        return code;
+    }
 }
 
 // ─────────────────────────────────────────────
@@ -56,6 +83,7 @@ class FpdfGenerator extends BaseGenerator {
         const orient = this.getOrientation();
         const fmt = this.getPageFormat() || `array(${state.pageWidth}, ${state.pageHeight})`;
         let code = `<?php\nrequire('fpdf.php');\n\n`;
+        code += this.buildDbFetch();
         code += `$pdf = new FPDF('${orient}', 'mm', '${fmt}');\n`;
         code += `$pdf->SetAutoPageBreak(false);\n\n`;
         code += this.buildPages();
@@ -155,10 +183,18 @@ class FpdfGenerator extends BaseGenerator {
                 const size = el.fontSize || 12;
                 const cellW = el.w ? parseFloat(el.w.toFixed(1)) : 0;
                 const cellH = parseFloat((size * 0.352778 * 1.2).toFixed(1));
+                
+                let content = el.content;
+                if (el.dbTable && el.dbColumn) {
+                    const varName = this.slugify(el.dbTable);
+                    const rsName = "$rs" + varName.charAt(0).toUpperCase() + varName.slice(1);
+                    content = `'. ${rsName}->fields['${el.dbColumn}'] . '`;
+                }
+
                 c += `// Text: "${el.content}"\n`;
                 c += `$pdf->SetFont('Arial', '${style}', ${size});\n`;
                 c += `$pdf->SetXY(${el.x}, ${el.y});\n`;
-                c += `$pdf->MultiCell(${cellW}, ${cellH}, '${this.esc(el.content)}');\n\n`;
+                c += `$pdf->MultiCell(${cellW}, ${cellH}, '${content}');\n\n`;
                 break;
             }
 
@@ -255,6 +291,7 @@ class TcpdfGenerator extends FpdfGenerator {
         const fmt = this.getPageFormat() || `array(${state.pageWidth}, ${state.pageHeight})`;
         const fmtStr = this.getPageFormat() ? `'${fmt}'` : fmt;
         let code = `<?php\nrequire_once('tcpdf.php');\n\n`;
+        code += this.buildDbFetch();
         code += `$pdf = new TCPDF('${orient}', 'mm', ${fmtStr}, true, 'UTF-8', false);\n`;
         code += `$pdf->SetCreator('FPDF Layout Designer');\n`;
         code += `$pdf->SetAuthor('');\n`;
@@ -282,10 +319,18 @@ class TcpdfGenerator extends FpdfGenerator {
                 const size = el.fontSize || 11;
                 const cellW = el.w ? parseFloat(el.w.toFixed(1)) : 0;
                 const cellH = parseFloat((size * 0.352778 * 1.2).toFixed(1));
+
+                let content = el.content;
+                if (el.dbTable && el.dbColumn) {
+                    const varName = this.slugify(el.dbTable);
+                    const rsName = "$rs" + varName.charAt(0).toUpperCase() + varName.slice(1);
+                    content = `'. ${rsName}->fields['${el.dbColumn}'] . '`;
+                }
+
                 c += `// Text: "${el.content}"\n`;
                 c += `$pdf->SetFont('arial', '${style}', ${size});\n`;
                 c += `$pdf->SetXY(${el.x}, ${el.y});\n`;
-                c += `$pdf->MultiCell(${cellW}, ${cellH}, '${this.esc(el.content)}', 0, 'L', false, 1);\n\n`;
+                c += `$pdf->MultiCell(${cellW}, ${cellH}, '${content}', 0, 'L', false, 1);\n\n`;
                 break;
             }
 
@@ -388,6 +433,16 @@ class DompdfGenerator extends BaseGenerator {
         code += `$options->set('defaultFont', 'Arial');\n`;
         code += `$options->set('isHtml5ParserEnabled', true);\n\n`;
         code += `$dompdf = new Dompdf($options);\n\n`;
+        code += `// --- Database Fetch ---\n`;
+        code += `// $DB = new Database(); // Replace with your DB connection\n`;
+        const tables = this.getUsedTables();
+        for (const table of tables) {
+            const varName = this.slugify(table);
+            const rsName = "$rs" + varName.charAt(0).toUpperCase() + varName.slice(1);
+            const pkName = table.toLowerCase().replace(/^tbl/, '') + "id";
+            code += `// ${rsName} = $DB->Execute("SELECT * FROM ${table} WHERE ${pkName} = '$x${pkName}'");\n`;
+        }
+        code += "\n";
 
         const pages = this.getPages();
         const allElements = pages.size > 0
@@ -439,8 +494,16 @@ class DompdfGenerator extends BaseGenerator {
                 const size = el.fontSize || 11;
                 const weight = (el.fontStyle || '').includes('B') ? 'bold' : 'normal';
                 const italic = (el.fontStyle || '').includes('I') ? 'italic' : 'normal';
+                
+                let content = el.content;
+                if (el.dbTable && el.dbColumn) {
+                    const varName = this.slugify(el.dbTable);
+                    const rsName = "$rs" + varName.charAt(0).toUpperCase() + varName.slice(1);
+                    content = `{\${${rsName}->fields['${el.dbColumn}']}}`;
+                }
+
                 return `  <!-- Text: "${this.esc(el.content)}" -->\n` +
-                    `  <div class="abs" style="left:${el.x}mm;top:${el.y}mm;width:${el.w || 'auto'}mm;font-size:${size}pt;font-weight:${weight};font-style:${italic};">${this.esc(el.content)}</div>\n`;
+                    `  <div class="abs" style="left:${el.x}mm;top:${el.y}mm;width:${el.w || 'auto'}mm;font-size:${size}pt;font-weight:${weight};font-style:${italic};">${content}</div>\n`;
             }
 
             case 'line':
@@ -558,6 +621,17 @@ class MpdfGenerator extends DompdfGenerator {
         code += `    'margin_bottom'=> 0,\n`;
         code += `    'margin_left' => 0,\n`;
         code += `]);\n\n`;
+        
+        code += `// --- Database Fetch ---\n`;
+        code += `// $DB = new Database(); // Replace with your DB connection\n`;
+        const tables = this.getUsedTables();
+        for (const table of tables) {
+            const varName = this.slugify(table);
+            const rsName = "$rs" + varName.charAt(0).toUpperCase() + varName.slice(1);
+            const pkName = table.toLowerCase().replace(/^tbl/, '') + "id";
+            code += `// ${rsName} = $DB->Execute("SELECT * FROM ${table} WHERE ${pkName} = '$x${pkName}'");\n`;
+        }
+        code += "\n";
 
         const pages = this.getPages();
         const allElements = pages.size > 0

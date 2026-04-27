@@ -166,6 +166,14 @@ if (!isset($_SESSION['user_id'])) {
                     </svg>
                     <span class="tool-label">Margins</span>
                 </button>
+                <button class="tool-btn toggle-btn" id="btn-toggle-db-explorer" title="Toggle Database Explorer">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <ellipse cx="12" cy="5" rx="9" ry="3" />
+                        <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
+                        <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+                    </svg>
+                    <span class="tool-label">Database</span>
+                </button>
             </div>
 
             <div class="toolbar-separator"></div>
@@ -287,10 +295,10 @@ if (!isset($_SESSION['user_id'])) {
             </div>
 
             <!-- Database Explorer Sidebar -->
-            <aside id="db-explorer" class="sidebar db-explorer hidden">
+            <aside id="db-explorer" class="sidebar db-explorer collapsed">
                 <div class="inspector-header">
                     <h2>Database</h2>
-                    <button id="btn-close-db-explorer" class="icon-btn" title="Close Database Explorer">
+                    <button id="btn-toggle-db-sidebar" class="icon-btn" title="Toggle Database Sidebar">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <polyline points="15 18 9 12 15 6" />
                         </svg>
@@ -701,6 +709,14 @@ if (!isset($_SESSION['user_id'])) {
                 </div>
                 <div class="modal-body">
                     <div class="modal-field">
+                        <label for="db-driver">Database Type</label>
+                        <select id="db-driver" style="padding:6px 10px; background:var(--bg-surface); border:1px solid var(--border-default); border-radius:6px; color:var(--text-primary); font-size:13px; cursor:pointer; font-family:var(--font-sans); width: 100%;">
+                            <option value="mysql" selected>MySQL / MariaDB</option>
+                            <option value="pgsql">PostgreSQL</option>
+                            <option value="sqlite">SQLite</option>
+                        </select>
+                    </div>
+                    <div class="modal-field">
                         <label for="db-host">Host</label>
                         <input type="text" id="db-host" placeholder="localhost" value="localhost">
                     </div>
@@ -717,8 +733,12 @@ if (!isset($_SESSION['user_id'])) {
                         <input type="password" id="db-pass" placeholder="password">
                     </div>
                     <div class="modal-field">
-                        <label for="db-name">Database</label>
+                        <label for="db-name">Database / Path</label>
                         <input type="text" id="db-name" placeholder="my_database">
+                    </div>
+                    <div class="modal-field" style="flex-direction: row; align-items: center; gap: 8px; margin-top: 8px;">
+                        <input type="checkbox" id="db-save-config" style="width: auto; margin: 0;">
+                        <label for="db-save-config" style="margin: 0; cursor: pointer;">Save configuration for next time</label>
                     </div>
                 </div>
                 <div class="modal-footer">
