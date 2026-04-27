@@ -7,5 +7,4 @@ const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('electronAPI', {
     // Expose app version from package metadata
     getVersion: () => ipcRenderer.invoke('get-version'),
-    dbConnect: (config) => ipcRenderer.invoke('db-connect', config),
 });

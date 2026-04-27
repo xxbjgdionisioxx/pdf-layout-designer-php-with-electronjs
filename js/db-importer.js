@@ -68,23 +68,18 @@ export const dbImporter = {
     
     try {
       let schema;
-      // Check if we are in Electron and the API is available
-      if (window.electronAPI && typeof window.electronAPI.dbConnect === 'function') {
-        schema = await window.electronAPI.dbConnect(config);
-      } else {
-        // Fallback to direct fetch
-        const response = await fetch('api/db-schema.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(config)
-        });
-        
-        if (!response.ok) {
-          const errText = await response.text();
-          throw new Error(errText || `Server returned ${response.status}`);
-        }
-        schema = await response.json();
+      // Always use direct fetch so the session cookie is sent to the local PHP server
+      const response = await fetch('api/db-schema.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(config)
+      });
+      
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(errText || `Server returned ${response.status}`);
       }
+      schema = await response.json();
 
       // If successful and saveConfig is checked, save to user profile
       if (saveConfig) {
