@@ -50,7 +50,7 @@ if ($method === 'POST') {
         $email = trim($data['email'] ?? '');
         $password = $data['password'] ?? '';
         
-        $stmt = $pdo->prepare("SELECT id, email, password_hash, is_verified FROM users WHERE email = ?");
+        $stmt = $pdo->prepare("SELECT id, email, password_hash, is_verified, db_config FROM users WHERE email = ?");
         $stmt->execute([$email]);
         $user = $stmt->fetch();
         
@@ -67,7 +67,8 @@ if ($method === 'POST') {
             
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['email'] = $user['email'];
-            echo json_encode(["success" => true, "user" => ["id" => $user['id'], "email" => $user['email']]]);
+            $dbConfig = $user['db_config'] ? json_decode($user['db_config'], true) : null;
+            echo json_encode(["success" => true, "user" => ["id" => $user['id'], "email" => $user['email']], "db_config" => $dbConfig]);
         } else {
             http_response_code(401);
             echo json_encode(["error" => "Invalid email or password"]);
@@ -77,7 +78,7 @@ if ($method === 'POST') {
         $email = trim($data['email'] ?? '');
         $otp = trim($data['otp'] ?? '');
         
-        $stmt = $pdo->prepare("SELECT id, email, otp_code FROM users WHERE email = ? AND is_verified = FALSE");
+        $stmt = $pdo->prepare("SELECT id, email, otp_code, db_config FROM users WHERE email = ? AND is_verified = FALSE");
         $stmt->execute([$email]);
         $user = $stmt->fetch();
         
@@ -88,7 +89,8 @@ if ($method === 'POST') {
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['email'] = $user['email'];
             
-            echo json_encode(["success" => true]);
+            $dbConfig = $user['db_config'] ? json_decode($user['db_config'], true) : null;
+            echo json_encode(["success" => true, "db_config" => $dbConfig]);
         } else {
             http_response_code(400);
             echo json_encode(["error" => "Invalid or expired OTP."]);

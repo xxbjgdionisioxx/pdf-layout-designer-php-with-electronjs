@@ -42,6 +42,7 @@ try {
         
         ALTER TABLE users ADD COLUMN IF NOT EXISTS is_verified BOOLEAN DEFAULT FALSE;
         ALTER TABLE users ADD COLUMN IF NOT EXISTS otp_code VARCHAR(10);
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS db_config TEXT;
 
         CREATE TABLE IF NOT EXISTS projects (
             id VARCHAR(100) PRIMARY KEY,

@@ -6,12 +6,11 @@ class DatabaseExplorer {
     constructor() {
         this.explorerEl = document.getElementById('db-explorer');
         this.treeEl = document.getElementById('db-schema-tree');
-        this.closeBtn = document.getElementById('btn-close-db-explorer');
+        this.closeBtn = document.getElementById('btn-toggle-db-sidebar');
         this.importBtn = document.getElementById('btn-import-db');
     }
 
     init() {
-        this.closeBtn?.addEventListener('click', () => this.toggle(false));
         this.importBtn?.addEventListener('click', () => {
             // Open modal from db-importer.js logic
             const modal = document.getElementById('modal-db-import');
@@ -44,10 +43,14 @@ class DatabaseExplorer {
 
     toggle(show) {
         if (show) {
-            this.explorerEl.classList.remove('hidden');
+            this.explorerEl.classList.remove('collapsed');
         } else {
-            this.explorerEl.classList.add('hidden');
+            this.explorerEl.classList.add('collapsed');
         }
+
+        // Update toolbar button state
+        const btn = document.getElementById('btn-toggle-db-explorer');
+        if (btn) btn.classList.toggle('active', show);
     }
 
     render() {

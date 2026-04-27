@@ -1260,11 +1260,25 @@ input[type=number]::-webkit-outer-spin-button {
     z-index: 60;
 }
 
-.db-explorer.hidden {
-    width: 0;
-    opacity: 0;
-    pointer-events: none;
-    border: none;
+.db-explorer.collapsed {
+    width: 36px;
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.db-explorer.collapsed .inspector-header h2,
+.db-explorer.collapsed .inspector-content {
+    display: none;
+}
+
+.db-explorer.collapsed .inspector-header {
+    padding: 10px 0;
+    justify-content: center;
+    border-bottom: none;
+}
+
+.db-explorer.collapsed #btn-toggle-db-sidebar {
+    transform: rotate(180deg);
 }
 
 .db-tree {

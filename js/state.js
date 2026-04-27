@@ -31,6 +31,7 @@ class AppState {
         this.pdfFilename = null;
         // Database schema (imported)
         this.dbSchema = null; // { tables: [{ name, columns: [{ name, type }] }] }
+        this.savedDbConfig = null; // Saved credentials from user profile
         
         // Elements: Map<pageNum, Element[]>
         this.elements = new Map();
@@ -39,6 +40,7 @@ class AppState {
         // Selection state
         this.selectedElements = [];
         this.hoveredElement = null;
+        this.selectionMarquee = null; // { start: {x,y}, end: {x,y} } in mm
         
         // Drawing state (used during drag operations)
         this.isDrawing = false;
