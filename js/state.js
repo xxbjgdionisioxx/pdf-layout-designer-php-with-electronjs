@@ -29,6 +29,8 @@ class AppState {
         this.pdfPages = new Map(); // pageNum -> rendered ImageData
         this.pdfSource = null; // Base64 or ArrayBuffer of the source PDF
         this.pdfFilename = null;
+        // Database schema (imported)
+        this.dbSchema = null; // { tables: [{ name, columns: [{ name, type }] }] }
         
         // Elements: Map<pageNum, Element[]>
         this.elements = new Map();
@@ -172,6 +174,7 @@ class AppState {
             nextId: this._nextId,
             pdfSource: this.pdfSource,
             pdfFilename: this.pdfFilename,
+            dbSchema: this.dbSchema,
         };
     }
     
@@ -189,6 +192,7 @@ class AppState {
         this._nextId = data.nextId || 1;
         this.pdfSource = data.pdfSource || null;
         this.pdfFilename = data.pdfFilename || null;
+        this.dbSchema = data.dbSchema || null;
         
         this.elements = new Map();
         if (data.elements) {

@@ -3,7 +3,7 @@
 // Spawns a local PHP server and opens the app in a BrowserWindow
 // ============================================================
 
-const { app, BrowserWindow, shell, dialog, Menu } = require('electron');
+const { app, BrowserWindow, shell, dialog, Menu, ipcMain } = require('electron');
 const { spawn } = require('child_process');
 const path = require('path');
 const http = require('http');
@@ -130,6 +130,45 @@ app.whenReady().then(async () => {
     try {
         Menu.setApplicationMenu(null);
         await startPhpServer();
+        // Register DB IPC handlers after server is ready
+        ipcMain.handle('db-connect', async (event, config) => {
+          return new Promise((resolve, reject) => {
+            const postData = JSON.stringify(config);
+            const options = {
+              hostname: '127.0.0.1',
+              port: PORT,
+              path: '/api/db-schema.php',
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Content-Length': Buffer.byteLength(postData)
+              }
+            };
+
+            const req = http.request(options, (res) => {
+              let body = '';
+              res.on('data', (chunk) => body += chunk);
+              res.on('end', () => {
+                if (res.statusCode >= 200 && res.statusCode < 300) {
+                  try {
+                    resolve(JSON.parse(body));
+                  } catch (e) {
+                    reject(new Error('Invalid JSON response from server'));
+                  }
+                } else {
+                  reject(new Error(`Server error: ${res.statusCode} - ${body}`));
+                }
+              });
+            });
+
+            req.on('error', (e) => {
+              console.error('DB connect IPC error:', e);
+              reject(e);
+            });
+            req.write(postData);
+            req.end();
+          });
+        });
         createWindow();
     } catch (err) {
         dialog.showErrorBox(

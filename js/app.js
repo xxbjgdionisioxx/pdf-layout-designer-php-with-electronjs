@@ -19,6 +19,8 @@ import { exporter } from './exporter.js';
 import { serializer } from './serializer.js';
 import { projectManager } from './project-manager.js';
 import { dbExporter } from './db-exporter.js';
+import { dbExplorer } from './db-explorer.js';
+import './db-importer.js';
 
 // Tools
 import { selectTool } from './tools/select.js';
@@ -60,6 +62,7 @@ class App {
         serializer.init();
         projectManager.init();
         dbExporter.init();
+        dbExplorer.init();
 
         // Bind toolbar buttons
         this.bindToolbar();
@@ -260,6 +263,52 @@ class App {
 
         // Prevent context menu on canvas
         drawCanvas.addEventListener('contextmenu', (e) => e.preventDefault());
+
+        // Handle drag and drop from DB explorer
+        drawCanvas.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'copy';
+        });
+
+        drawCanvas.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const data = e.dataTransfer.getData('application/json');
+            if (data) {
+                try {
+                    const parsed = JSON.parse(data);
+                    if (parsed.type === 'db-column') {
+                        const mm = canvasManager.getMouseMm(e);
+                        this.handleDbColumnDrop(parsed, mm.x, mm.y);
+                    }
+                } catch (err) {
+                    console.error('Failed to parse drop data', err);
+                }
+            }
+        });
+    }
+
+    handleDbColumnDrop(data, x, y) {
+        // Create a table element with one row and one column for the dropped field
+        const table = {
+            type: 'table',
+            x: x,
+            y: y,
+            w: 50, // default width
+            h: 12, // default height
+            rows: 2, // 1 header + 1 data row
+            cols: 1,
+            label: `${data.table}.${data.column}`,
+            dbColumn: data.column,
+            dbTable: data.table,
+            dbType: data.dataType,
+            loop: false,
+            // Custom properties for table tool
+            headers: [data.column],
+            colWidths: [50]
+        };
+        
+        state.addElement(table);
+        showToast(`Linked ${data.column} to new table element`, 'success');
     }
 
     bindPageNavigation() {
