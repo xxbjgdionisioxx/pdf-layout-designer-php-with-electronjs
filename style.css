@@ -298,11 +298,11 @@ input[type=number]::-webkit-outer-spin-button {
 #main-layout {
     flex: 1;
     display: grid;
-    grid-template-columns: var(--ruler-size) 1fr auto auto;
+    grid-template-columns: auto var(--ruler-size) 1fr auto auto;
     grid-template-rows: var(--ruler-size) 1fr;
     grid-template-areas:
-        "corner  hruler   elements  inspector"
-        "vruler  canvas   elements  inspector";
+        "db-explorer corner  hruler   elements  inspector"
+        "db-explorer vruler  canvas   elements  inspector";
     overflow: hidden;
     position: relative;
     background: var(--bg-primary);
@@ -1247,3 +1247,107 @@ input[type=number]::-webkit-outer-spin-button {
         min-height: 44px;
     }
 }
+
+/* ============ DATABASE EXPLORER (GLASSMORPHISM) ============ */
+.db-explorer {
+    grid-area: db-explorer;
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    background: rgba(22, 27, 34, 0.75);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    transition: all var(--transition-normal);
+    z-index: 60;
+}
+
+.db-explorer.hidden {
+    width: 0;
+    opacity: 0;
+    pointer-events: none;
+    border: none;
+}
+
+.db-tree {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.db-table-node {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.db-table-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    cursor: pointer;
+    user-select: none;
+    transition: background var(--transition-fast);
+}
+
+.db-table-header:hover {
+    background: rgba(88, 166, 255, 0.1);
+}
+
+.db-table-icon {
+    color: var(--accent);
+    flex-shrink: 0;
+    transition: transform var(--transition-fast);
+}
+
+.db-table-node.expanded .db-table-icon {
+    transform: rotate(90deg);
+}
+
+.db-table-name {
+    font-weight: 600;
+    font-size: 12px;
+    color: var(--text-primary);
+}
+
+.db-column-list {
+    list-style: none;
+    padding: 0 0 8px 34px;
+    display: none;
+}
+
+.db-table-node.expanded .db-column-list {
+    display: block;
+}
+
+.db-column-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 0;
+    font-size: 11px;
+    color: var(--text-secondary);
+    cursor: grab;
+    transition: color var(--transition-fast);
+}
+
+.db-column-item:hover {
+    color: var(--accent);
+}
+
+.db-column-item:active {
+    cursor: grabbing;
+}
+
+.db-column-type {
+    font-size: 9px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+}
+
+/* Animations */
+@keyframes slideIn {
+    from { transform: translateX(-20px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+.db-table-node {
+    animation: slideIn 0.3s ease forwards;
+}

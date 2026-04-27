@@ -206,6 +206,13 @@ if (!isset($_SESSION['user_id'])) {
                     </svg>
                     <span class="tool-label">DB Schema</span>
                 </button>
+                <button class="tool-btn" id="btn-import-db" title="Import MySQL Database">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 4h16v16H4z"/>
+                        <path d="M8 8h8v8H8z"/>
+                    </svg>
+                    <span class="tool-label">Import DB</span>
+                </button>
                 <button class="tool-btn" id="btn-save" title="Save Project As JSON (Ctrl+S)">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
@@ -278,6 +285,25 @@ if (!isset($_SESSION['user_id'])) {
                     <canvas id="layer-cursor"></canvas>
                 </div>
             </div>
+
+            <!-- Database Explorer Sidebar -->
+            <aside id="db-explorer" class="sidebar db-explorer hidden">
+                <div class="inspector-header">
+                    <h2>Database</h2>
+                    <button id="btn-close-db-explorer" class="icon-btn" title="Close Database Explorer">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="15 18 9 12 15 6" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="inspector-content">
+                    <div class="inspector-section">
+                        <div id="db-schema-tree" class="db-tree">
+                            <p class="no-elements">No database imported</p>
+                        </div>
+                    </div>
+                </div>
+            </aside>
 
             <!-- Elements Sidebar -->
             <aside id="elements-panel" class="sidebar">
@@ -663,6 +689,41 @@ if (!isset($_SESSION['user_id'])) {
                 <div class="modal-footer">
                     <button class="btn btn-secondary" data-modal="modal-text">Cancel</button>
                     <button class="btn btn-primary" id="modal-text-ok">Add Text</button>
+                </div>
+            </div>
+        </div>
+        <!-- DB Import Credential Modal -->
+        <div id="modal-db-import" class="modal-overlay" style="display:none;">
+            <div class="modal-dialog">
+                <div class="modal-header">
+                    <h3>Import MySQL Database</h3>
+                    <button class="modal-close" data-modal="modal-db-import">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-field">
+                        <label for="db-host">Host</label>
+                        <input type="text" id="db-host" placeholder="localhost" value="localhost">
+                    </div>
+                    <div class="modal-field">
+                        <label for="db-port">Port</label>
+                        <input type="number" id="db-port" placeholder="3306" value="3306">
+                    </div>
+                    <div class="modal-field">
+                        <label for="db-user">User</label>
+                        <input type="text" id="db-user" placeholder="username">
+                    </div>
+                    <div class="modal-field">
+                        <label for="db-pass">Password</label>
+                        <input type="password" id="db-pass" placeholder="password">
+                    </div>
+                    <div class="modal-field">
+                        <label for="db-name">Database</label>
+                        <input type="text" id="db-name" placeholder="my_database">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-modal="modal-db-import">Cancel</button>
+                    <button class="btn btn-primary" id="modal-db-import-ok">Connect</button>
                 </div>
             </div>
         </div>
