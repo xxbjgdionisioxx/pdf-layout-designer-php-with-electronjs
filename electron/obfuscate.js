@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const JavaScriptObfuscator = require('javascript-obfuscator');
+const { execSync } = require('child_process');
 
 const rootDir = path.join(__dirname, '..');
 const electronDir = __dirname;
@@ -64,6 +65,41 @@ function processDirectory(srcBase, relativePath, isJSOnly = false) {
 }
 
 console.log('--- Starting Obfuscation ---');
+
+// 0. Ensure PHP is present
+const phpDir = path.join(rootDir, 'php');
+const phpExe = path.join(phpDir, 'php.exe');
+if (!fs.existsSync(phpExe)) {
+    console.log('PHP not found. Downloading portable PHP 8.2...');
+    const phpUrl = 'https://windows.php.net/downloads/releases/archives/php-8.2.12-nts-Win32-vs16-x64.zip';
+    const phpZip = path.join(process.env.TEMP, 'php-portable.zip');
+
+    if (!fs.existsSync(phpDir)) fs.mkdirSync(phpDir, { recursive: true });
+
+    try {
+        console.log(`Downloading: ${phpUrl}`);
+        execSync(`powershell -NoProfile -Command "Invoke-WebRequest -Uri '${phpUrl}' -OutFile '${phpZip}' -UseBasicParsing"`, { stdio: 'inherit' });
+        
+        console.log('Extracting PHP...');
+        execSync(`powershell -NoProfile -Command "Expand-Archive -Path '${phpZip}' -DestinationPath '${phpDir}' -Force"`, { stdio: 'inherit' });
+        
+        if (fs.existsSync(phpZip)) fs.unlinkSync(phpZip);
+
+        // Basic php.ini setup if needed
+        const phpIniDev = path.join(phpDir, 'php.ini-development');
+        const phpIni = path.join(phpDir, 'php.ini');
+        if (fs.existsSync(phpIniDev) && !fs.existsSync(phpIni)) {
+            fs.copyFileSync(phpIniDev, phpIni);
+            console.log('Created basic php.ini');
+        }
+        console.log('PHP setup complete.');
+    } catch (err) {
+        console.error('Failed to setup PHP:', err.message);
+        // We continue anyway, electron-builder might fail later but we tried.
+    }
+} else {
+    console.log('PHP already present.');
+}
 
 // 1. Obfuscate Electron main files
 console.log('Processing Electron main files...');

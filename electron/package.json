@@ -7,12 +7,13 @@
   "scripts": {
     "start": "electron .",
     "prebuild": "node obfuscate.js",
-    "build": "electron-builder --win",
-    "build:dir": "electron-builder --win --dir"
+    "build": "cross-env ELECTRON_BUILDER_ALLOW_HANDLE_SYMLINKS_AS_FILES=true electron-builder --win",
+    "build:dir": "cross-env ELECTRON_BUILDER_ALLOW_HANDLE_SYMLINKS_AS_FILES=true electron-builder --win --dir"
   },
   "devDependencies": {
+    "cross-env": "^10.1.0",
     "electron": "^30.0.0",
-    "electron-builder": "^24.0.0",
+    "electron-builder": "^23.6.0",
     "electron-icon-builder": "^2.0.1",
     "javascript-obfuscator": "^5.4.1",
     "png-to-ico": "^3.0.1"
@@ -69,7 +70,10 @@
       },
       {
         "from": "../php",
-        "to": "php"
+        "to": "php",
+        "filter": [
+          "**/*"
+        ]
       }
     ],
     "nsis": {
