@@ -23,6 +23,8 @@ A professional, multi-user **web + desktop** visual designer for creating PHP PD
 ![Export FPDF](images/export-fpdf.png) 
 ![Export mPDF](images/export-mpdf.png)
 ![Export database](images/export-db.png)
+![Import database](images/import-database.png)
+![Database columns](images/database-columns.png)
 
 
 ---
@@ -92,6 +94,12 @@ One-click PHP code generation from your entire canvas layout. Switch between 4 P
 - **Margin visualizers** (configurable T/R/B/L)
 - **Zoom** in/out/fit/reset controls
 - **Full Undo / Redo** history
+
+### 📥 Database Schema Importer
+Connect your own database directly within the designer to import table structures.
+- **Auto-Fetch Schema:** Instantly retrieve table columns and types.
+- **Live Sync:** Drag and drop imported database fields onto your PDF layout.
+- **Support for Multiple Dialects:** MySQL, MariaDB, PostgreSQL, and SQLite.
 
 ### 🗄️ Database Schema Exporter
 Generate `CREATE TABLE` SQL statements instantly from your canvas layout.
