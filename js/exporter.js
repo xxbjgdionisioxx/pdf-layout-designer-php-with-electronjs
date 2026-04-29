@@ -47,28 +47,34 @@ class BaseGenerator {
             || 'field';
     }
 
-    getUsedTables() {
-        const tables = new Set();
+    getUsedTableColumns() {
+        const tableColumns = new Map(); // Table Name -> Set of Column Names
         for (const [pageNum, elements] of state.elements) {
             for (const el of elements) {
-                if (el.dbTable) tables.add(el.dbTable);
+                if (el.dbTable) {
+                    if (!tableColumns.has(el.dbTable)) tableColumns.set(el.dbTable, new Set());
+                    if (el.dbColumn) tableColumns.get(el.dbTable).add(el.dbColumn);
+                }
             }
         }
-        return Array.from(tables);
+        return tableColumns;
     }
 
-    buildDbFetch() {
-        const tables = this.getUsedTables();
-        if (tables.length === 0) return "";
+    buildDbFetch(commented = false) {
+        const tableColumns = this.getUsedTableColumns();
+        if (tableColumns.size === 0) return "";
 
-        let code = "// --- Database Fetch ---\n";
-        code += "$DB = new Database(); // Replace with your DB connection\n\n";
+        const prefix = commented ? "// " : "";
+        let code = `${prefix}// --- Database Fetch ---\n`;
+        code += `${prefix}$DB = new Database(); // Replace with your DB connection\n\n`;
 
-        for (const table of tables) {
+        for (const [table, columns] of tableColumns) {
             const varName = this.slugify(table);
             const rsName = "$rs" + varName.charAt(0).toUpperCase() + varName.slice(1);
             const pkName = table.toLowerCase().replace(/^tbl/, '') + "id"; // common pattern
-            code += `${rsName} = $DB->Execute("SELECT * FROM ${table} WHERE ${pkName} = '$x${pkName}'");\n`;
+            
+            const columnList = columns.size > 0 ? Array.from(columns).join(', ') : "*";
+            code += `${prefix}${rsName} = $DB->Execute("SELECT ${columnList} FROM ${table} WHERE ${pkName} = '$x${pkName}'");\n`;
         }
         code += "\n";
         return code;
@@ -433,15 +439,7 @@ class DompdfGenerator extends BaseGenerator {
         code += `$options->set('defaultFont', 'Arial');\n`;
         code += `$options->set('isHtml5ParserEnabled', true);\n\n`;
         code += `$dompdf = new Dompdf($options);\n\n`;
-        code += `// --- Database Fetch ---\n`;
-        code += `// $DB = new Database(); // Replace with your DB connection\n`;
-        const tables = this.getUsedTables();
-        for (const table of tables) {
-            const varName = this.slugify(table);
-            const rsName = "$rs" + varName.charAt(0).toUpperCase() + varName.slice(1);
-            const pkName = table.toLowerCase().replace(/^tbl/, '') + "id";
-            code += `// ${rsName} = $DB->Execute("SELECT * FROM ${table} WHERE ${pkName} = '$x${pkName}'");\n`;
-        }
+        code += this.buildDbFetch(true);
         code += "\n";
 
         const pages = this.getPages();
@@ -622,15 +620,7 @@ class MpdfGenerator extends DompdfGenerator {
         code += `    'margin_left' => 0,\n`;
         code += `]);\n\n`;
         
-        code += `// --- Database Fetch ---\n`;
-        code += `// $DB = new Database(); // Replace with your DB connection\n`;
-        const tables = this.getUsedTables();
-        for (const table of tables) {
-            const varName = this.slugify(table);
-            const rsName = "$rs" + varName.charAt(0).toUpperCase() + varName.slice(1);
-            const pkName = table.toLowerCase().replace(/^tbl/, '') + "id";
-            code += `// ${rsName} = $DB->Execute("SELECT * FROM ${table} WHERE ${pkName} = '$x${pkName}'");\n`;
-        }
+        code += this.buildDbFetch(true);
         code += "\n";
 
         const pages = this.getPages();

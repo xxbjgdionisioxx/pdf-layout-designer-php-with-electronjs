@@ -4,22 +4,47 @@ import { showToast } from './cursor.js';
 
 class DatabaseExplorer {
     constructor() {
+        this.explorerEl = null;
+        this.treeEl = null;
+        this.closeBtn = null;
+        this.importBtn = null;
+        this.searchInput = null;
+        this.clearBtn = null;
+        this.searchQuery = '';
+    }
+
+    init() {
         this.explorerEl = document.getElementById('db-explorer');
         this.treeEl = document.getElementById('db-schema-tree');
         this.closeBtn = document.getElementById('btn-toggle-db-sidebar');
         this.importBtn = document.getElementById('btn-import-db');
-    }
+        this.searchInput = document.getElementById('db-search-input');
+        this.clearBtn = document.getElementById('btn-clear-db-search');
 
-    init() {
         this.importBtn?.addEventListener('click', () => {
-            // Open modal from db-importer.js logic
             const modal = document.getElementById('modal-db-import');
             if (modal) modal.style.display = 'flex';
+        });
+
+        this.searchInput?.addEventListener('input', (e) => {
+            this.searchQuery = e.target.value.toLowerCase();
+            this.render();
+        });
+
+        this.clearBtn?.addEventListener('click', () => {
+            if (this.searchInput) {
+                this.searchInput.value = '';
+                this.searchQuery = '';
+                this.render();
+                this.searchInput.focus();
+            }
         });
 
         // Listen for schema loaded event
         window.addEventListener('db-schema-loaded', (e) => {
             state.dbSchema = e.detail;
+            this.searchQuery = '';
+            if (this.searchInput) this.searchInput.value = '';
             this.render();
             this.toggle(true);
             showToast('Database schema imported successfully', 'success');
@@ -42,18 +67,25 @@ class DatabaseExplorer {
     }
 
     toggle(show) {
+        if (!this.explorerEl) return;
         if (show) {
             this.explorerEl.classList.remove('collapsed');
         } else {
             this.explorerEl.classList.add('collapsed');
         }
 
-        // Update toolbar button state
         const btn = document.getElementById('btn-toggle-db-explorer');
         if (btn) btn.classList.toggle('active', show);
     }
 
+    highlight(text) {
+        if (!this.searchQuery) return text;
+        const regex = new RegExp(`(${this.searchQuery})`, 'gi');
+        return text.replace(regex, '<span class="db-highlight">$1</span>');
+    }
+
     render() {
+        if (!this.treeEl) return;
         if (!state.dbSchema || !state.dbSchema.tables) {
             this.treeEl.innerHTML = '<p class="no-elements">No database imported</p>';
             return;
@@ -63,9 +95,24 @@ class DatabaseExplorer {
         const ul = document.createElement('ul');
         ul.className = 'db-tree';
 
-        state.dbSchema.tables.forEach(table => {
+        const filteredTables = state.dbSchema.tables.filter(table => 
+            table.name.toLowerCase().includes(this.searchQuery) ||
+            table.columns.some(col => col.name.toLowerCase().includes(this.searchQuery))
+        );
+
+        if (filteredTables.length === 0) {
+            this.treeEl.innerHTML = `<p class="no-elements">${this.searchQuery ? 'No matching tables found' : 'No tables available'}</p>`;
+            return;
+        }
+
+        filteredTables.forEach(table => {
             const li = document.createElement('li');
             li.className = 'db-table-node';
+            
+            // Auto-expand if searching and a column matches
+            if (this.searchQuery && table.columns.some(col => col.name.toLowerCase().includes(this.searchQuery))) {
+                li.classList.add('expanded');
+            }
 
             const header = document.createElement('div');
             header.className = 'db-table-header';
@@ -73,7 +120,7 @@ class DatabaseExplorer {
                 <svg class="db-table-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polyline points="9 18 15 12 9 6"></polyline>
                 </svg>
-                <span class="db-table-name">${table.name}</span>
+                <span class="db-table-name">${this.highlight(table.name)}</span>
             `;
 
             const columnList = document.createElement('ul');
@@ -91,7 +138,7 @@ class DatabaseExplorer {
                     <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <rect x="3" y="3" width="18" height="18" rx="2"></rect>
                     </svg>
-                    <span class="db-column-name">${col.name}</span>
+                    <span class="db-column-name">${this.highlight(col.name)}</span>
                     <span class="db-column-type">${col.type}</span>
                 `;
 
