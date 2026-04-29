@@ -9,6 +9,7 @@ if (!isset($_SESSION['user_id'])) {
 <html lang="en">
 
 <head>
+    <link rel='shortcut icon' type='image/x-icon' href='assets/24x24.png' />
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description"
@@ -216,8 +217,8 @@ if (!isset($_SESSION['user_id'])) {
                 </button>
                 <button class="tool-btn" id="btn-import-db" title="Import MySQL Database">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M4 4h16v16H4z"/>
-                        <path d="M8 8h8v8H8z"/>
+                        <path d="M4 4h16v16H4z" />
+                        <path d="M8 8h8v8H8z" />
                     </svg>
                     <span class="tool-label">Import DB</span>
                 </button>
@@ -299,7 +300,8 @@ if (!isset($_SESSION['user_id'])) {
                 <div class="inspector-header">
                     <h2>Database</h2>
                     <button id="btn-toggle-db-sidebar" class="icon-btn" title="Toggle Database Sidebar">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
                             <polyline points="15 18 9 12 15 6" />
                         </svg>
                     </button>
@@ -307,13 +309,16 @@ if (!isset($_SESSION['user_id'])) {
                 <div class="inspector-content">
                     <div class="db-search-wrapper">
                         <div class="db-search-inner">
-                            <svg class="search-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <svg class="search-icon" width="12" height="12" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2">
                                 <circle cx="11" cy="11" r="8"></circle>
                                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                             </svg>
-                            <input type="text" id="db-search-input" placeholder="Search tables or columns..." class="db-search-input">
+                            <input type="text" id="db-search-input" placeholder="Search tables or columns..."
+                                class="db-search-input">
                             <button id="btn-clear-db-search" class="clear-btn" title="Clear Search">
-                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="3">
                                     <line x1="18" y1="6" x2="6" y2="18"></line>
                                     <line x1="6" y1="6" x2="18" y2="18"></line>
                                 </svg>
@@ -333,26 +338,36 @@ if (!isset($_SESSION['user_id'])) {
                 <div class="inspector-header">
                     <h2>Elements</h2>
                     <button id="btn-toggle-elements" class="icon-btn" title="Toggle Elements List">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
                             <polyline points="15 18 9 12 15 6" />
                         </svg>
                     </button>
                 </div>
                 <div class="inspector-content">
                     <div class="inspector-section">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                             <h3 style="margin: 0;">Elements <span id="element-count" class="badge">0</span></h3>
                             <div style="display: flex; gap: 4px;">
-                                <button id="btn-delete-selected-list" class="icon-btn" style="color: var(--accent-danger); padding: 4px; display: none;" title="Delete Selected Elements">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <button id="btn-delete-selected-list" class="icon-btn"
+                                    style="color: var(--accent-danger); padding: 4px; display: none;"
+                                    title="Delete Selected Elements">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
                                         <polyline points="3 6 5 6 21 6" />
-                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                        <path
+                                            d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
                                     </svg>
                                 </button>
-                                <button id="btn-delete-all" class="icon-btn" style="color: var(--accent-danger); padding: 4px; display: none;" title="Delete All Elements">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <button id="btn-delete-all" class="icon-btn"
+                                    style="color: var(--accent-danger); padding: 4px; display: none;"
+                                    title="Delete All Elements">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
                                         <polyline points="3 6 5 6 21 6" />
-                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                        <path
+                                            d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
                                         <line x1="10" y1="11" x2="10" y2="17" />
                                         <line x1="14" y1="11" x2="14" y2="17" />
                                     </svg>
@@ -568,14 +583,18 @@ if (!isset($_SESSION['user_id'])) {
                                 <input type="text" id="sel-button-value" placeholder="e.g. Male">
                             </div>
                             <div class="inspector-field full-width" style="margin-top: 12px;">
-                                <button id="btn-clone-button" class="btn-primary" style="width: 100%; padding: 6px; font-size: 12px;">
+                                <button id="btn-clone-button" class="btn-primary"
+                                    style="width: 100%; padding: 6px; font-size: 12px;">
                                     + Add Option (Clone)
                                 </button>
                             </div>
                         </div>
                         <!-- Global Database Export Settings -->
-                        <div id="global-db-fields" style="display:none; padding-top: 15px; margin-top: 15px; border-top: 1px solid var(--border-default);">
-                            <h4 style="margin: 0 0 10px 0; font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Database Schema Settings</h4>
+                        <div id="global-db-fields"
+                            style="display:none; padding-top: 15px; margin-top: 15px; border-top: 1px solid var(--border-default);">
+                            <h4
+                                style="margin: 0 0 10px 0; font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">
+                                Database Schema Settings</h4>
                             <div class="inspector-field full-width">
                                 <label for="sel-global-db-col">DB Column Name</label>
                                 <input type="text" id="sel-global-db-col" placeholder="Auto-generated from label">
@@ -725,7 +744,8 @@ if (!isset($_SESSION['user_id'])) {
                 <div class="modal-body">
                     <div class="modal-field">
                         <label for="db-driver">Database Type</label>
-                        <select id="db-driver" style="padding:6px 10px; background:var(--bg-surface); border:1px solid var(--border-default); border-radius:6px; color:var(--text-primary); font-size:13px; cursor:pointer; font-family:var(--font-sans); width: 100%;">
+                        <select id="db-driver"
+                            style="padding:6px 10px; background:var(--bg-surface); border:1px solid var(--border-default); border-radius:6px; color:var(--text-primary); font-size:13px; cursor:pointer; font-family:var(--font-sans); width: 100%;">
                             <option value="mysql" selected>MySQL / MariaDB</option>
                             <option value="pgsql">PostgreSQL</option>
                             <option value="sqlite">SQLite</option>
@@ -751,9 +771,11 @@ if (!isset($_SESSION['user_id'])) {
                         <label for="db-name">Database / Path</label>
                         <input type="text" id="db-name" placeholder="my_database">
                     </div>
-                    <div class="modal-field" style="flex-direction: row; align-items: center; gap: 8px; margin-top: 8px;">
+                    <div class="modal-field"
+                        style="flex-direction: row; align-items: center; gap: 8px; margin-top: 8px;">
                         <input type="checkbox" id="db-save-config" style="width: auto; margin: 0;">
-                        <label for="db-save-config" style="margin: 0; cursor: pointer;">Save configuration for next time</label>
+                        <label for="db-save-config" style="margin: 0; cursor: pointer;">Save configuration for next
+                            time</label>
                     </div>
                 </div>
                 <div class="modal-footer">
