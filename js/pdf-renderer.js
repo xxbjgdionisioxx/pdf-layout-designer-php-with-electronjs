@@ -31,9 +31,15 @@ class PdfRenderer {
      */
     async onProjectLoaded() {
         if (state.pdfSource) {
-            await this.loadPdfFromSource(state.pdfSource, state.pdfFilename);
+            const isImage = state.pdfFilename && state.pdfFilename.match(/\.(jpg|jpeg|png)$/i);
+            if (isImage) {
+                await this.loadImageFromSource(state.pdfSource, state.pdfFilename);
+            } else {
+                await this.loadPdfFromSource(state.pdfSource, state.pdfFilename);
+            }
         } else {
             this.pdfDoc = null;
+            this.bgImage = null;
             state.pdfDoc = null;
             this.drawBlankPage();
             this.updatePageUI();
@@ -45,6 +51,8 @@ class PdfRenderer {
      */
     async loadPdf(file) {
         try {
+            const isImage = file.type.startsWith('image/');
+
             // Read as data URL to get Base64 easily and robustly
             const reader = new FileReader();
             const base64Promise = new Promise((resolve, reject) => {
@@ -57,14 +65,18 @@ class PdfRenderer {
             state.pdfSource = base64;
             state.pdfFilename = file.name;
             
-            await this.loadPdfFromSource(base64, file.name);
+            if (isImage) {
+                await this.loadImageFromSource(base64, file.name);
+            } else {
+                await this.loadPdfFromSource(base64, file.name);
+            }
             
-            showToast(`PDF loaded: ${state.totalPages} page(s)`, 'success');
+            showToast(`${isImage ? 'Image' : 'PDF'} loaded: ${state.totalPages} page(s)`, 'success');
             state.emit('pdfLoaded');
             
         } catch (err) {
-            console.error('PDF load error:', err);
-            showToast('Failed to load PDF: ' + err.message, 'error');
+            console.error('File load error:', err);
+            showToast('Failed to load file: ' + err.message, 'error');
         }
     }
 
@@ -73,6 +85,7 @@ class PdfRenderer {
      */
     async loadPdfFromSource(base64, filename) {
         try {
+            this.bgImage = null;
             const binaryString = atob(base64);
             const bytes = new Uint8Array(binaryString.length);
             for (let i = 0; i < binaryString.length; i++) {
@@ -113,6 +126,50 @@ class PdfRenderer {
             
         } catch (err) {
             console.error('Source PDF load error:', err);
+            throw err;
+        }
+    }
+
+    /**
+     * Load Image from Base64 source
+     */
+    async loadImageFromSource(base64, filename) {
+        try {
+            const img = new Image();
+            const mimeType = filename.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg';
+            const imgPromise = new Promise((resolve, reject) => {
+                img.onload = () => resolve(img);
+                img.onerror = reject;
+            });
+            img.src = `data:${mimeType};base64,` + base64;
+            await imgPromise;
+            
+            this.pdfDoc = null;
+            state.pdfDoc = null;
+            this.bgImage = img;
+            state.totalPages = 1;
+            state.pdfFilename = filename;
+            
+            for (let i = 1; i <= state.totalPages; i++) {
+                if (!state.elements.has(i)) {
+                    state.elements.set(i, []);
+                }
+            }
+            
+            // Assume 96 DPI for image dimensions (1px = 0.264583 mm)
+            const widthMm = img.width * 0.264583;
+            const heightMm = img.height * 0.264583;
+            
+            state.setPageSize(
+                Math.round(widthMm * 10) / 10,
+                Math.round(heightMm * 10) / 10
+            );
+            
+            this.pageCache.clear();
+            await this.renderCurrentPage();
+            
+        } catch (err) {
+            console.error('Source Image load error:', err);
             throw err;
         }
     }
@@ -188,7 +245,7 @@ class PdfRenderer {
      * Render the current page onto the PDF layer
      */
     async renderCurrentPage() {
-        if (!this.pdfDoc) {
+        if (!this.pdfDoc && !this.bgImage) {
             // No PDF loaded — just draw white background
             this.drawBlankPage();
             return;
@@ -197,38 +254,42 @@ class PdfRenderer {
         const pageNum = state.currentPage;
         
         try {
-            const page = await this.pdfDoc.getPage(pageNum);
-            const zoom = state.zoom;
-            const scale = (MM_TO_PX * zoom) / (72 / 25.4); // convert from PDF points to our px
-            
-            const viewport = page.getViewport({ scale });
-            
-            // Render to offscreen canvas
-            const offscreen = document.createElement('canvas');
-            offscreen.width = viewport.width;
-            offscreen.height = viewport.height;
-            const offCtx = offscreen.getContext('2d');
-            
-            await page.render({
-                canvasContext: offCtx,
-                viewport: viewport,
-            }).promise;
-            
-            // Draw onto PDF layer
             const ctx = canvasManager.getContext('pdf');
             canvasManager.clear('pdf');
             
-            // White background
+            const zoom = state.zoom;
             const w = state.pageWidth * MM_TO_PX * zoom;
             const h = state.pageHeight * MM_TO_PX * zoom;
+            
+            // White background
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(0, 0, w, h);
-            
-            // Draw PDF
-            ctx.drawImage(offscreen, 0, 0, w, h);
+
+            if (this.pdfDoc) {
+                const page = await this.pdfDoc.getPage(pageNum);
+                const scale = (MM_TO_PX * zoom) / (72 / 25.4); // convert from PDF points to our px
+                
+                const viewport = page.getViewport({ scale });
+                
+                // Render to offscreen canvas
+                const offscreen = document.createElement('canvas');
+                offscreen.width = viewport.width;
+                offscreen.height = viewport.height;
+                const offCtx = offscreen.getContext('2d');
+                
+                await page.render({
+                    canvasContext: offCtx,
+                    viewport: viewport,
+                }).promise;
+                
+                // Draw PDF
+                ctx.drawImage(offscreen, 0, 0, w, h);
+            } else if (this.bgImage) {
+                ctx.drawImage(this.bgImage, 0, 0, w, h);
+            }
             
         } catch (err) {
-            console.error('PDF render error:', err);
+            console.error('Render error:', err);
             this.drawBlankPage();
         }
         
