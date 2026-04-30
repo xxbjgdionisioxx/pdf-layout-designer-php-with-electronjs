@@ -53,8 +53,8 @@ if (!isset($_SESSION['user_id'])) {
                     </svg>
                     <span class="tool-label">Projects</span>
                 </button>
-                <label class="tool-btn" id="btn-upload" title="Upload PDF (Ctrl+O)">
-                    <input type="file" id="pdf-upload" accept=".pdf" hidden>
+                <label class="tool-btn" id="btn-upload" title="Upload Background (PDF/JPG/PNG) (Ctrl+O)">
+                    <input type="file" id="pdf-upload" accept=".pdf, .jpg, .jpeg, .png" hidden>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                         <polyline points="17 8 12 3 7 8" />
