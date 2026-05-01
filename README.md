@@ -25,6 +25,7 @@ A professional, multi-user **web + desktop** visual designer for creating PHP PD
 ![Export database](images/export-db.png)
 ![Import database](images/import-database.png)
 ![Database columns](images/database-columns.png)
+![Import PHP](images/import-php.png)
 
 
 ---
@@ -115,6 +116,17 @@ Upload an existing PDF with AcroForm fields, and the designer will automatically
 - Auto-generate `checkbox` and `inputbox` elements on your canvas.
 - Map original PDF field names directly to element labels.
 - Convert PDF coordinate space to standard millimeter bounds automatically.
+
+### 🔄 Import PHP Code (Reverse Engineering)
+Paste your existing FPDF or TCPDF code, and the designer will automatically map it back to the canvas:
+- Parses absolute coordinates (`SetXY`, `Cell`, `MultiCell`, `Rect`, `Line`, `Image`).
+- Instantly reconstructs your visual canvas based on coordinate commands.
+- Automatically generates the corresponding UI elements in the Elements panel.
+
+### 🖼️ PDF & Image Background Templates
+Upload both `.pdf` and image files (`.jpg`, `.jpeg`, `.png`) to act as your background canvas:
+- Automatically scales the page canvas to the uploaded file's native resolution.
+- Allows perfect tracing and alignment of forms using a visual reference.
 
 ---
 

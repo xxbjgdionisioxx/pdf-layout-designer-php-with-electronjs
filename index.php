@@ -206,6 +206,13 @@ if (!isset($_SESSION['user_id'])) {
                     </svg>
                     <span class="tool-label">Export</span>
                 </button>
+                <button class="tool-btn" id="btn-import-php" title="Import PHP Code" style="color: #60a5fa;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="8 18 2 12 8 6" />
+                        <polyline points="16 6 22 12 16 18" />
+                    </svg>
+                    <span class="tool-label">Import PHP</span>
+                </button>
                 <button class="tool-btn" id="btn-db-export" title="Export DB Schema (CREATE TABLE SQL)"
                     style="color: #34d399;">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -417,19 +424,19 @@ if (!isset($_SESSION['user_id'])) {
                         <div class="inspector-grid-4">
                             <div class="inspector-field">
                                 <label for="margin-top">T</label>
-                                <input type="number" id="margin-top" value="10" min="0" step="1">
+                                <input type="number" id="margin-top" value="0" min="0" step="1">
                             </div>
                             <div class="inspector-field">
                                 <label for="margin-right">R</label>
-                                <input type="number" id="margin-right" value="10" min="0" step="1">
+                                <input type="number" id="margin-right" value="0" min="0" step="1">
                             </div>
                             <div class="inspector-field">
                                 <label for="margin-bottom">B</label>
-                                <input type="number" id="margin-bottom" value="10" min="0" step="1">
+                                <input type="number" id="margin-bottom" value="0" min="0" step="1">
                             </div>
                             <div class="inspector-field">
                                 <label for="margin-left">L</label>
-                                <input type="number" id="margin-left" value="10" min="0" step="1">
+                                <input type="number" id="margin-left" value="0" min="0" step="1">
                             </div>
                         </div>
                     </div>
@@ -731,6 +738,25 @@ if (!isset($_SESSION['user_id'])) {
                 <div class="modal-footer">
                     <button class="btn btn-secondary" data-modal="modal-text">Cancel</button>
                     <button class="btn btn-primary" id="modal-text-ok">Add Text</button>
+                </div>
+            </div>
+        </div>
+        <!-- Import PHP Modal -->
+        <div id="modal-import-php" class="modal-overlay" style="display:none;">
+            <div class="modal-dialog" style="width: 600px;">
+                <div class="modal-header">
+                    <h3>Import PHP Code</h3>
+                    <button class="modal-close" data-modal="modal-import-php">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p style="margin-bottom: 10px; font-size: 13px; color: var(--text-muted);">Paste your FPDF or TCPDF code below. The system will extract coordinates and elements automatically.</p>
+                    <div class="modal-field full-width">
+                        <textarea id="modal-import-php-content" rows="12" placeholder="$pdf->Rect(10, 10, 50, 20);" style="width: 100%; font-family: monospace; padding: 10px; resize: vertical; border: 1px solid var(--border-default); border-radius: 6px; background: var(--bg-surface); color: var(--text-primary);"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-modal="modal-import-php">Cancel</button>
+                    <button class="btn btn-primary" id="modal-import-php-ok">Import Elements</button>
                 </div>
             </div>
         </div>

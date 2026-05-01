@@ -15,7 +15,7 @@ export const DEFAULTS = {
     pageTemplate: 'a4-portrait',
     pageWidth: 210,
     pageHeight: 297,
-    margins: { top: 10, right: 10, bottom: 10, left: 10 },
+    margins: { top: 0, right: 0, bottom: 0, left: 0 },
     zoom: 1.0,
     gridSpacing: 5,
     gridVisible: true,
