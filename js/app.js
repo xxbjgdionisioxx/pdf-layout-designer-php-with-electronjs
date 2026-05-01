@@ -20,6 +20,7 @@ import { serializer } from './serializer.js';
 import { projectManager } from './project-manager.js';
 import { dbExporter } from './db-exporter.js';
 import { dbExplorer } from './db-explorer.js';
+import { importer } from './importer.js';
 import './db-importer.js';
 
 // Tools
@@ -63,6 +64,7 @@ class App {
         projectManager.init();
         dbExporter.init();
         dbExplorer.init();
+        importer.init();
 
         // Bind toolbar buttons
         this.bindToolbar();
